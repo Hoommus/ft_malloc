@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hoommus <marvin@42.fr>                     +#+  +:+       +#+         #
+#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2018/03/24 10:11:17 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/04/04 14:49:20 by hoommus          ###   ########.fr        #
+#    Created: 2019/07/12 14:31:34 by vtarasiu          #+#    #+#              #
+#    Updated: 2019/07/12 14:40:53 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,11 +16,13 @@ endif
 
 NAME = libft_malloc_$(HOSTTYPE).so
 
-FLAGS = -g -std=c11 -Wall \
+FLAGS = -g -Wall \
                     -Wextra \
                     -Werror \
                     -Wno-unknown-pragmas \
-                    --shared \
+                    --shared
+                    -fPIC
+#                    -lpthread \
                     #-Og -fsanitize="address"
 
 HEADER = -I include/ -I libft/
