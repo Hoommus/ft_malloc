@@ -1,20 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   free.c                                             :+:      :+:    :+:   */
+/*   realloc.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/01 15:38:41 by vtarasiu         ###   ########.fr       */
+/*   Created: 2019/11/30 11:58:05 by vtarasiu          #+#    #+#             */
+/*   Updated: 2019/11/30 11:58:05 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-void	free(void *ptr)
+void			*realloc(void *ptr, size_t new_size)
 {
-	if (!ptr)
-		return ;
-	// search through regions using page numbers from PAGE_NUMBER_MASK macro
+	// TODO: if new size > pagesize, don't try to realloc
+	//       if new size >> this block size, try to realloc to bigger block
+	//       if new size > 2^48, fail
+	//       if ptr does not have enough space to the left to store block metadata, consider it a invalid address
+	//       if ptr is not a valid block, fail
+	return (NULL + ptr);
 }
