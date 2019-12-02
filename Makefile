@@ -20,7 +20,6 @@ FLAGS = -g -Wall \
                     -Wextra \
                     -Werror \
                     -Wno-unknown-pragmas \
-                    --shared
                     -fPIC
 #                    -lpthread \
                     #-Og -fsanitize="address"
@@ -38,11 +37,17 @@ OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	clang $(FLAGS) -o $(NAME) $(OBJ) $(HEADER) $(LIB_NAME)
+$(NAME): $(OBJ) $(LIB_NAME)
+	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADER) $(LIB_NAME)
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
 	clang $(FLAGS) $(HEADER) -o $@ -c $< ;
+
+$(LIB_NAME):
+	make -C $(LIB_DIR)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
 clean:
 	make -C libft clean
