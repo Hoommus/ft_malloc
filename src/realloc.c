@@ -14,10 +14,12 @@
 
 void			*realloc(void *ptr, size_t new_size)
 {
+	(void)ptr;
+	(void)new_size;
 	// TODO: if new size > pagesize, don't try to realloc
 	//       if new size >> this block size, try to realloc to bigger block
 	//       if new size > 2^48, fail
 	//       if ptr does not have enough space to the left to store block metadata, consider it a invalid address
 	//       if ptr is not a valid block, fail
-	return (NULL + ptr);
+	return (NULL);
 }

@@ -23,11 +23,12 @@ struct s_region								*region_create(void *start, size_t size, enum e_size_type
 	ft_bzero(region, sizeof(struct s_region));
 	region->start = start;
 	region->bytes_mapped = size;
+	region->is_free = true;
 	if (type == BLK_TINY)
-		region->tinies = region->start + ALIGN_TO_ARCH( sizeof(struct s_region));
+		region->tinies = region->start + ALIGN_TO_ARCH(sizeof(struct s_region));
 	else if (type == BLK_SMALL)
 		region->smallies = region->start + sizeof(struct s_region);
-	else
+	else if (type == BLK_LARGE)
 		region->largies = region->start + sizeof(struct s_region);
 	return (region);
 }
@@ -35,12 +36,12 @@ struct s_region								*region_create(void *start, size_t size, enum e_size_type
 __attribute__((constructor)) static void	malloc_init(void)
 {
 	int				pagesize;
-	const size_t	first_region_size =
-		ALIGN_TO_PAGE(REGION_TINIES_SIZE + REGION_SMALLIES_SIZE, pagesize);
+	size_t			first_region_size;
 	struct rlimit	lim;
 
 	pthread_mutex_init(&g_mutex, NULL);
 	pagesize = getpagesize();
+	first_region_size = ALIGN_TO_PAGE(REGION_TINIES_SIZE + REGION_SMALLIES_SIZE, pagesize);
 	getrlimit(RLIMIT_DATA, &lim);
 	g_storage = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_ANON, -1, 0);
 	g_storage->map_start = g_storage;
@@ -53,7 +54,9 @@ __attribute__((constructor)) static void	malloc_init(void)
 	ft_bzero(g_storage->regions, sizeof(struct s_region));
 	g_storage->regions->next = mmap(NULL, first_region_size,
 		PROT_READ | PROT_WRITE, MAP_ANON, -1, 0);
-	g_storage->regions->next = region_create(g_storage->regions->next, REGION_TINIES_SIZE, BLK_TINY);
+	g_storage->total_mapped += first_region_size;
+	g_storage->regions->next = region_create(g_storage->regions->next,
+		ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize), BLK_TINY);
 	//g_storage->regions->next = region_create(g_storage->regions->next, REGION_SMALLIES_SIZE, BLK_SMALL);
 	//g_storage->regions->next->next = g_storage->regions->next + REGION_TINIES_SIZE;
 }
@@ -72,14 +75,19 @@ __attribute__((destructor)) static void		malloc_destroy(void)
 		list = next;
 	}
 	munmap(g_storage->map_start, g_storage->pagesize);
-
 	pthread_mutex_unlock(&g_mutex);
 	pthread_mutex_destroy(&g_mutex);
 }
 
-
 void										*malloc(size_t size)
 {
-	// if size > pagesize, map a large zone
-	;
+	if (size == 0)
+		return (NULL);
+	if (size > g_storage->pagesize)
+		return (alloc_largie(size));
+	if (size > BLOCK_TINY_SIZE)
+		return (alloc_small(size));
+	// add some more failures
+	return (alloc_tiny(size));
 }
+

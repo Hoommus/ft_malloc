@@ -24,21 +24,23 @@ FLAGS = -g -Wall \
 #                    -lpthread \
                     #-Og -fsanitize="address"
 
-HEADER = -I include/ -I libft/
+HEADER = -I includes/ -I libft/
 SRC_DIR = ./src/
 OBJ_DIR = ./obj/
 
 LIB_DIR = ./libft
 LIB_NAME = libft.a
 
-MALLOC_SRC = main.c
+MALLOC_SRC = free.c \
+	     realloc.c \
+	     malloc.c
 
 OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIB_NAME)
-	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADER) $(LIB_NAME)
+	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADER) $(LIB_DIR)/$(LIB_NAME)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
 	clang $(FLAGS) $(HEADER) -o $@ -c $< ;
