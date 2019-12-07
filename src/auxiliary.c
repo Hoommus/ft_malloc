@@ -1,25 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   free.c                                             :+:      :+:    :+:   */
+/*   auxiliary.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/07 16:53:30 by vtarasiu         ###   ########.fr       */
+/*   Created: 2019/12/07 16:11:30 by vtarasiu          #+#    #+#             */
+/*   Updated: 2019/12/07 17:23:54 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
 
-void	free(void *ptr)
+inline bool		ptr_seems_valid(void *ptr)
 {
-	if (!ptr)
-		return ;
-	if (!ptr_seems_valid(ptr))
-	{
-		write(2, "*** pointer being freed was not allocated\n", 42);
-		abort();
-	}
-	// search through regions using page numbers from PAGE_NUMBER_MASK macro
+#if __POINTER_WIDTH__ == 64
+	if (((size_t)ptr) & ADDRESS_SPACE_HEADER)
+		return (false);
+#endif
+	return (true);
 }

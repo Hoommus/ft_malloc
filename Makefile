@@ -24,7 +24,6 @@ FLAGS = -g -Wall \
 #                    -lpthread \
                     #-Og -fsanitize="address"
 
-HEADER = -I includes/ -I libft/
 SRC_DIR = ./src/
 OBJ_DIR = ./obj/
 
@@ -32,18 +31,20 @@ LIB_DIR = ./libft
 LIB_NAME = libft.a
 
 MALLOC_SRC = free.c \
-	     realloc.c \
-	     malloc.c
+	         realloc.c \
+	         malloc.c
+
+HEADERS = -I includes/ -I $(LIB_DIR) -I $(PRINTF_DIR)
 
 OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 
 all: $(NAME)
 
 $(NAME): $(OBJ) $(LIB_NAME)
-	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADER) $(LIB_DIR)/$(LIB_NAME)
+	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	clang $(FLAGS) $(HEADER) -o $@ -c $< ;
+	clang $(FLAGS) $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)

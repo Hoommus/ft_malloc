@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 11:58:05 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/11/30 11:58:05 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/12/07 16:50:27 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 void			*realloc(void *ptr, size_t new_size)
 {
-	(void)ptr;
+	if (ptr_seems_valid(ptr))
+		return NULL;
 	(void)new_size;
 	// TODO: if new size > pagesize, don't try to realloc
 	//       if new size >> this block size, try to realloc to bigger block
