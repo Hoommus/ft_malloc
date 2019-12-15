@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:25:04 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/01 18:19:03 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/12/15 16:15:03 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 pthread_mutex_t								g_mutex;
 struct s_storage *restrict					g_storage;
 
-struct s_region								*region_create(void *start, size_t size, enum e_size_type type)
+struct s_region								*region_create(void *start, size_t size)
 {
 	struct s_region		*region;
 
@@ -24,12 +24,6 @@ struct s_region								*region_create(void *start, size_t size, enum e_size_type
 	region->start = start;
 	region->bytes_mapped = size;
 	region->is_free = true;
-	if (type == BLK_TINY)
-		region->tinies = region->start + ALIGN_TO_ARCH(sizeof(struct s_region));
-	else if (type == BLK_SMALL)
-		region->smallies = region->start + sizeof(struct s_region);
-	else if (type == BLK_LARGE)
-		region->largies = region->start + sizeof(struct s_region);
 	return (region);
 }
 
@@ -56,9 +50,7 @@ __attribute__((constructor)) static void	malloc_init(void)
 		PROT_READ | PROT_WRITE, MAP_ANON, -1, 0);
 	g_storage->total_mapped += first_region_size;
 	g_storage->regions->next = region_create(g_storage->regions->next,
-		ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize), BLK_TINY);
-	//g_storage->regions->next = region_create(g_storage->regions->next, REGION_SMALLIES_SIZE, BLK_SMALL);
-	//g_storage->regions->next->next = g_storage->regions->next + REGION_TINIES_SIZE;
+		ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize));
 }
 
 __attribute__((destructor)) static void		malloc_destroy(void)
@@ -85,7 +77,7 @@ void										*malloc(size_t size)
 		return (NULL);
 	if (size > g_storage->pagesize)
 		return (alloc_largie(size));
-	if (size > BLOCK_TINY_SIZE)
+	if (size > BLK_TINY_MAX)
 		return (alloc_small(size));
 	// add some more failures
 	return (alloc_tiny(size));

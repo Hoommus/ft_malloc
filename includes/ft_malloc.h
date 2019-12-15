@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:01:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/07 19:08:47 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/12/15 19:41:20 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,22 +28,26 @@
 
 # define ALIGNMENT sizeof(size_t)
 
-# define ABS(x) ((x) < 0 ? -(x) : (x))
+# ifndef ABS
+#  define ABS(x) ((x) < 0 ? -(x) : (x))
+# endif
 
 # define ALIGN_TO_PAGE(x, pgsz) ((x) + ABS((pgsz - x) % (pgsz)))
 # define ALIGN_TO_ARCH(x)       ((x) + ABS((ALIGNMENT - x) % ALIGNMENT))
 
-# define BLOCK_TINY_SIZE 128
-# define BLOCK_SMALL_SIZE 4096
+# define BLK_TINY_MAX 128
+# define BLK_SMALL_MAX 4096
 
 # define BLOCK_MIN_SIZE 16
 
-# define REGION_TINIES_SIZE (BLOCK_TINY_SIZE * 128)
-# define REGION_SMALLIES_SIZE (BLOCK_SMALL_SIZE * 128)
+# define REGION_TINIES_SIZE (BLK_TINY_MAX * 128)
+# define REGION_SMALLIES_SIZE (BLK_SMALL_MAX * 128)
 
 # define PAGE_ADDRESS_MASK  0xFFFU // 12 bits of address space per page
 # define PAGE_NUMBER_MASK (~0x0ULL) ^ (PAGE_ADDRESS_MASK)
 # define ADDRESS_SPACE_HEADER 0xFFFF000000000000ULL
+
+# define ZONE_MAGIC 0xBADBABE0DEADCAFE
 
 enum								e_size_type
 {
@@ -52,29 +56,26 @@ enum								e_size_type
 	BLK_LARGE = 3
 };
 
-struct								s_tblk
+struct								s_block
 {
 	enum e_size_type	type:1;
-	uint8_t				size:7;
-	ptrdiff_t			pointer:48;
-} __attribute__((packed));
-
-struct								s_sblk
-{
-	enum e_size_type	type:2;
 	uint16_t			size:12;
-	ptrdiff_t			pointer:48;
-};
+	size_t				pointer : 48;
+} __attribute__((packed,aligned(8)));
 
 // Zones contain blocks that will be returned via a malloc() call
 struct								s_zone
 {
+	uint64_t			zone_magic;
 	enum e_size_type	type:3;
 	bool				is_full:1;
 	bool				is_free:1;
+	size_t				bytes_malloced:48;
+	size_t				zone_size:48;
+	size_t				table_size:16;
+	size_t				table_used:16;
 	struct s_zone		*next;
-	uint16_t			table_size;
-	struct s_block		*blocks;
+	struct s_block		block_table[]; // TODO: restrict size to page boundary
 } __attribute__((packed,aligned(8)));
 
 // Regions contain continuous memory that was acquired from every mmap() call
@@ -87,18 +88,10 @@ struct								s_region
 	bool			is_free:1;
 	size_t			bytes_malloced:48;
 	size_t			bytes_mapped:48;
-	struct s_zone	*tinies;
-	struct s_zone	*smallies;
-	struct s_zone	*largies;
+	struct s_zone	*zones;
+	struct s_zone	*large;
 	struct s_region	*next;
 } __attribute__((aligned(8)));
-
-struct								s_block
-{
-	enum e_size_type	type : 2;
-	bool				is_free : 1;
-	size_t				size : 48;
-} __attribute__((packed,aligned(8)));
 
 # elif __POINTER_WIDTH__ == 32
 
