@@ -36,7 +36,7 @@
 # define ALIGN_TO_ARCH(x)       ((x) + ABS((ALIGNMENT - x) % ALIGNMENT))
 
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX 4096
+# define BLK_SMALL_MAX g_storage->pagesize
 
 # define BLOCK_MIN_SIZE 16
 
@@ -73,7 +73,7 @@ struct								s_zone
 	size_t				bytes_malloced:48;
 	size_t				zone_size:48;
 	size_t				table_size:16;
-	size_t				table_used:16;
+	size_t				first_free_block:16;
 	struct s_zone		*next;
 	struct s_block		block_table[]; // TODO: restrict size to page boundary
 } __attribute__((packed,aligned(8)));
