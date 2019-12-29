@@ -12,11 +12,13 @@
 
 #include "ft_malloc.h"
 
-inline bool		ptr_seems_valid(void *ptr)
+bool		ptr_seems_valid(void *ptr)
 {
 #if __POINTER_WIDTH__ == 64
 	if (((size_t)ptr) & ADDRESS_SPACE_HEADER)
 		return (false);
 #endif
+	if ((size_t)ptr % 8 != 0)
+		return (false);
 	return (true);
 }

@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:01:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/15 19:41:20 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2019/12/25 17:22:12 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 # include <stddef.h>
 # include <unistd.h>
 # include <pthread.h>
+# include <limits.h>
 # include "libft.h"
-# include "ft_printf.h"
 # ifdef __linux__
 #  include <sys/resource.h>
 # endif
@@ -40,8 +40,8 @@
 
 # define BLOCK_MIN_SIZE 16
 
-# define REGION_TINIES_SIZE (BLK_TINY_MAX * 128)
-# define REGION_SMALLIES_SIZE (BLK_SMALL_MAX * 128)
+# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 128)
+# define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
 
 # define PAGE_ADDRESS_MASK  0xFFFU // 12 bits of address space per page
 # define PAGE_NUMBER_MASK (~0x0ULL) ^ (PAGE_ADDRESS_MASK)
@@ -58,9 +58,9 @@ enum								e_size_type
 
 struct								s_block
 {
-	enum e_size_type	type:1;
+	bool				is_free:1;
 	uint16_t			size:12;
-	size_t				pointer : 48;
+	size_t				pointer : 64; // TODO: 3 bits left
 } __attribute__((packed,aligned(8)));
 
 // Zones contain blocks that will be returned via a malloc() call
@@ -71,12 +71,12 @@ struct								s_zone
 	bool				is_full:1;
 	bool				is_free:1;
 	size_t				bytes_malloced:48;
-	size_t				zone_size:48;
+	size_t				zone_size;
 	size_t				table_size:16;
-	size_t				first_free_block:16;
+	size_t				first_free_block_index:16;
 	struct s_zone		*next;
 	struct s_block		block_table[]; // TODO: restrict size to page boundary
-} __attribute__((packed,aligned(8)));
+} __attribute__((aligned(8)));
 
 // Regions contain continuous memory that was acquired from every mmap() call
 # if __POINTER_WIDTH__ == 64
@@ -90,8 +90,7 @@ struct								s_region
 	size_t			bytes_mapped:48;
 	struct s_zone	*zones;
 	struct s_zone	*large;
-	struct s_region	*next;
-} __attribute__((aligned(8)));
+} __attribute__((aligned(8))); // 40 bytes
 
 # elif __POINTER_WIDTH__ == 32
 
@@ -121,7 +120,10 @@ struct								s_block
 
 struct								s_stats
 {
-	int		dummy;
+	struct rlimit	limits;
+	size_t			total_allocated;
+	size_t			total_mapped;
+	int				dummy;
 };
 
 struct								s_storage
@@ -130,20 +132,20 @@ struct								s_storage
 	size_t			total_mapped;
 	size_t			total_allocated;
 	size_t			pagesize;
-	rlim_t			rlim_cur;
-	rlim_t			rlim_max;
 	struct s_stats	stats;
 	size_t			regions_quantity;
-	struct s_region	*regions;
+	struct s_region	regions[];
 } __attribute__((aligned(8)));
 
 extern pthread_mutex_t				g_mutex;
 extern struct s_storage *restrict	g_storage;
 
-void								ft_free(void *ptr);
-void								*ft_malloc(size_t size);
-void								*ft_realloc(void *ptr, size_t size);
-
-inline bool							ptr_seems_valid(void *ptr);
+bool								ptr_seems_valid(void *ptr);
+void								*alloc(size_t size, enum e_size_type type);
+void								*alloc_largie(size_t size);
+struct s_zone						*region_create_zone(struct s_region *region,
+														enum e_size_type type,
+														size_t size);
+void								show_alloc_mem(void);
 
 #endif

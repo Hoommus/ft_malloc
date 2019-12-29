@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
+#    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/07/12 14:31:34 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/07/12 14:40:53 by vtarasiu         ###   ########.fr        #
+#    Updated: 2019/12/25 17:11:06 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,15 +14,17 @@ ifeq ($(HOSTTYPE),)
 	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
 endif
 
+CC = /usr/bin/clang
+
 NAME = libft_malloc_$(HOSTTYPE).so
 
-FLAGS = -g -Wall \
-                    -Wextra \
-                    -Werror \
-                    -Wno-unknown-pragmas \
-                    -fPIC
-#                    -lpthread \
-                    #-Og -fsanitize="address"
+FLAGS = -g \
+        -Wall \
+        -Wextra \
+        -Werror \
+        -Wno-unknown-pragmas \
+        -fPIC
+#                    -lpthread
 
 SRC_DIR = ./src/
 OBJ_DIR = ./obj/
@@ -30,21 +32,28 @@ OBJ_DIR = ./obj/
 LIB_DIR = ./libft
 LIB_NAME = libft.a
 
-MALLOC_SRC = free.c \
-	         realloc.c \
-	         malloc.c
+MALLOC_SRC = realloc.c \
+             auxiliary.c \
+             region_management.c \
+             zones_management.c \
+             allocator.c \
+             free.c \
+             malloc.c
 
-HEADERS = -I includes/ -I $(LIB_DIR) -I $(PRINTF_DIR)
+HEADERS = -I includes/ -I $(LIB_DIR)
 
 OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 
 all: $(NAME)
 
-$(NAME): $(OBJ) $(LIB_NAME)
-	clang $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
+$(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
+	$(CC) $(FLAGS) --shared -flat_namespace -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
+	@if ! [[ -f libft_malloc.so ]] ; then \
+	    /bin/ln -s $(NAME) libft_malloc.so ; \
+	fi
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	clang $(FLAGS) $(HEADERS) -o $@ -c $< ;
+	$(CC) $(FLAGS) $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)

@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   debug.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 15:00:59 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/04/04 15:00:59 by vtarasiu         ###   ########.fr       */
+/*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
+/*   Updated: 2019/12/25 16:20:23 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_malloc.h"
 #include <stdio.h>
 
-int main()
+void		show_alloc_mem(void)
 {
-	printf("Hello, World!\n");
-	return 0;
+	printf("hello\n");
 }
