@@ -82,6 +82,7 @@ void				*get_block(struct s_zone *zone, size_t size)
 				possible_block = table + i;
 				continue ;
 			}
+			table[i].is_free = false;
 			table[i].pointer = table[i - 1].pointer + size;
 			table[i].size = size;
 			zone->first_free_block_index = next_free_block(zone, i);

@@ -11,11 +11,57 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
+#include <assert.h>
+#include <stdio.h>
+
+bool			free_large_region(struct s_region *region)
+{
+	assert(!region->zones);
+	assert(region->large);
+	assert(!region->large->next);
+	return (!munmap(region->start, region->bytes_mapped));
+}
+
+bool 			free_block(void *pointer)
+{
+	struct s_zone	*zone;
+	size_t			i;
+
+	zone = NULL;
+	i = -1;
+	while (++i < g_storage->regions_quantity)
+		if (in_region_bounds(g_storage->regions + i, pointer))
+		{
+			if (!g_storage->regions[i].large)
+			{
+				zone = g_storage->regions[i].zones;
+				break ;
+			}
+			else
+			{
+				free_large_region(g_storage->regions + i);
+				return ((g_storage->regions + i));
+			}
+		}
+	i = -1;
+	while (zone && ++i < zone->table_size)
+	{
+		if ((void *)zone->block_table[i].pointer == pointer)
+		{
+			zone->block_table[i].is_free = true;
+			return (zone->block_table[i].pointer);
+		}
+	}
+	return (false);
+}
 
 void	free(void *ptr)
 {
-	ft_putstr_fd("**** pointer being freed was not allocated: 0x", 2);
-	ft_putchar('\n');
 	if (!ptr)
 		return ;
+	if (!free_block(ptr))
+	{
+		printf("**** pointer being freed was not allocated: %p\n", ptr);
+		abort();
+	}
 }

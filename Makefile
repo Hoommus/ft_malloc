@@ -47,7 +47,7 @@ OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
-	$(CC) $(FLAGS) --shared -flat_namespace -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
+	$(CC) $(FLAGS) --shared -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
 	@if ! [[ -f libft_malloc.so ]] ; then \
 	    /bin/ln -s $(NAME) libft_malloc.so ; \
 	fi

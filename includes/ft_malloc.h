@@ -85,7 +85,6 @@ struct								s_region
 {
 	void			*start;
 	bool			is_full:1;
-	bool			is_free:1;
 	size_t			bytes_malloced:48;
 	size_t			bytes_mapped:48;
 	struct s_zone	*zones;
@@ -147,5 +146,6 @@ struct s_zone						*region_create_zone(struct s_region *region,
 														enum e_size_type type,
 														size_t size);
 void								show_alloc_mem(void);
+bool								in_region_bounds(struct s_region *region, void *ptr);
 
 #endif
