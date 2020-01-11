@@ -14,7 +14,7 @@ ifeq ($(HOSTTYPE),)
 	HOSTTYPE := $(shell uname -m)_$(shell uname -s)
 endif
 
-CC = /usr/bin/clang
+CC = clang
 
 NAME = libft_malloc_$(HOSTTYPE).so
 
@@ -48,7 +48,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
 	$(CC) $(FLAGS) --shared -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
-	@if ! [[ -f libft_malloc.so ]] ; then \
+	@if ! [ -f libft_malloc.so ] ; then \
 	    /bin/ln -s $(NAME) libft_malloc.so ; \
 	fi
 

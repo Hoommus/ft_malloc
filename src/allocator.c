@@ -21,12 +21,11 @@ void				*alloc_largie(size_t size)
 	struct s_region		*region;
 
 	aligned = ALIGN_TO_PAGE(ALIGN_TO_ARCH(sizeof(struct s_region)) + size, g_storage->pagesize);
-	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE, MAP_ANON, -1, 0);
+	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	ft_bzero(region, sizeof(region));
 	region->start = region;
 	region->bytes_mapped = aligned;
 	region->bytes_malloced = size;
-	region->is_free = false;
 	region->is_full = aligned == size;
 	region->large = (struct s_zone *)region + ALIGN_TO_ARCH(sizeof(struct s_region));
 	pthread_mutex_lock(&g_mutex);
@@ -63,7 +62,7 @@ void				*get_block(struct s_zone *zone, size_t size)
 	struct s_block	*possible_block;
 
 	possible_block = NULL;
-	assert(size <= g_storage->pagesize); // TODO: consider changing the strategy to `<= BLK_SMALL_MAX'
+	assert(size <= BLK_SMALL_MAX);
 	assert((zone->type == BLK_TINY || zone->type == BLK_SMALL));
 	if (size > g_storage->pagesize || zone->zone_size - zone->bytes_malloced < size)
 		return (NULL);
@@ -72,7 +71,8 @@ void				*get_block(struct s_zone *zone, size_t size)
 	while (++i < zone->table_size - 1)
 		if (table[i].pointer == 0 || table[i].is_free == true)
 		{
-			printf("this pointer: %zx, last %zx\n", table[i].pointer, table[i - 1].pointer);
+	//		printf("this pointer: %zx, last %zx\n", table[i].pointer, table[i - 1].pointer);
+			write(1, "hello\n", 6);
 			desired_ptr = table[i - 1].pointer + table[i - 1].size;
 			page_offset = table[i].pointer & PAGE_ADDRESS_MASK;
 			if (table[i + 1].pointer && table[i + 1].pointer < desired_ptr)
@@ -87,6 +87,8 @@ void				*get_block(struct s_zone *zone, size_t size)
 			table[i].size = size;
 			zone->first_free_block_index = next_free_block(zone, i);
 			g_storage->total_allocated += size;
+			ft_putnbr((int)table[i].pointer);
+			ft_putchar('\n');
 			return ((void *)(table[i].pointer));
 		}
 	return (NULL);
@@ -100,7 +102,6 @@ void				*alloc(size_t size, enum e_size_type type)
 	void			*blk;
 	size_t			i;
 
-	write(1, __func__, sizeof(__func__));
 	blk = NULL;
 	if (type == BLK_TINY)
 		aligned = size < BLOCK_MIN_SIZE ? BLOCK_MIN_SIZE : ALIGN_TO_ARCH(size);
@@ -108,7 +109,7 @@ void				*alloc(size_t size, enum e_size_type type)
 		aligned = size + BLK_TINY_MAX >= BLK_SMALL_MAX ? BLK_SMALL_MAX : ALIGN_TO_ARCH(size);
 	i = 0;
 	pthread_mutex_lock(&g_mutex);
-	printf("allocating block of size %zu(%zu)\n", size, aligned);
+	//printf("allocating block of size %zu(%zu)\n", size, aligned);
 	region = g_storage->regions;
 	while (i < g_storage->regions_quantity && !blk)
 	{
@@ -120,9 +121,9 @@ void				*alloc(size_t size, enum e_size_type type)
 			zone = zone->next;
 		}
 	}
-	printf("mapped: %zu\n", g_storage->total_mapped);
-	printf("total_allocated: %zu\n", g_storage->total_allocated);
-	printf("allocated: %p\n", blk);
+	//printf("mapped: %zu\n", g_storage->total_mapped);
+	//printf("total_allocated: %zu\n", g_storage->total_allocated);
+	//printf("allocated: %p\n", blk);
 	pthread_mutex_unlock(&g_mutex);
 	return (blk);
 }

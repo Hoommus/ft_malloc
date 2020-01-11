@@ -79,8 +79,6 @@ struct								s_zone
 } __attribute__((aligned(8)));
 
 // Regions contain continuous memory that was acquired from every mmap() call
-# if __POINTER_WIDTH__ == 64
-
 struct								s_region
 {
 	void			*start;
@@ -90,32 +88,6 @@ struct								s_region
 	struct s_zone	*zones;
 	struct s_zone	*large;
 } __attribute__((aligned(8))); // 40 bytes
-
-# elif __POINTER_WIDTH__ == 32
-
-struct								s_region
-{
-	void			*start;
-	bool			is_full:1;
-	bool			is_free:1;
-	size_t			bytes_malloced;
-	size_t			bytes_mapped;
-	struct s_zone	*tinies;
-	struct s_zone	*smallies;
-	struct s_zone	*largies;
-	struct s_region	*next;
-} __attribute__((aligned(4)));
-
-struct								s_block
-{
-	enum e_size_type	type : 2;
-	bool				is_free : 1;
-	size_t				size : 32;
-} __attribute__((packed,aligned(4)));
-
-# else
-#  error "unsupported arch"
-# endif
 
 struct								s_stats
 {

@@ -38,20 +38,12 @@ bool 			free_block(void *pointer)
 				break ;
 			}
 			else
-			{
-				free_large_region(g_storage->regions + i);
-				return ((g_storage->regions + i));
-			}
+				return (free_large_region(g_storage->regions + i));
 		}
 	i = -1;
 	while (zone && ++i < zone->table_size)
-	{
 		if ((void *)zone->block_table[i].pointer == pointer)
-		{
-			zone->block_table[i].is_free = true;
-			return (zone->block_table[i].pointer);
-		}
-	}
+			return (zone->block_table[i].is_free = true);
 	return (false);
 }
 
@@ -61,7 +53,10 @@ void	free(void *ptr)
 		return ;
 	if (!free_block(ptr))
 	{
-		printf("**** pointer being freed was not allocated: %p\n", ptr);
-		abort();
+		//printf("**** pointer being freed was not allocated: %p\n", ptr);
+		write(1, "hello from free\n", 15);
+		ft_putnbr((int)ptr);
+		ft_putchar('\n');
+		//abort();
 	}
 }
