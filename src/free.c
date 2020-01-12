@@ -57,6 +57,6 @@ void	free(void *ptr)
 		write(1, "hello from free\n", 15);
 		ft_putnbr((int)ptr);
 		ft_putchar('\n');
-		//abort();
+		abort();
 	}
 }

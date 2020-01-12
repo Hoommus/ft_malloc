@@ -26,10 +26,11 @@ void				*alloc_largie(size_t size)
 	region->start = region;
 	region->bytes_mapped = aligned;
 	region->bytes_malloced = size;
-	region->is_full = aligned == size;
+//	region->is_full = aligned == size;
 	region->large = (struct s_zone *)region + ALIGN_TO_ARCH(sizeof(struct s_region));
 	pthread_mutex_lock(&g_mutex);
 	g_storage->regions_quantity++;
+	g_storage->regions[g_storage->regions_quantity - 1] = *region;
 	pthread_mutex_unlock(&g_mutex);
 	return (region->large);
 }
@@ -108,7 +109,9 @@ void				*alloc(size_t size, enum e_size_type type)
 	else
 		aligned = size + BLK_TINY_MAX >= BLK_SMALL_MAX ? BLK_SMALL_MAX : ALIGN_TO_ARCH(size);
 	i = 0;
+	write(1, "Locking mutex\n", 14);
 	pthread_mutex_lock(&g_mutex);
+	write(1, "Inside alloc 2\n", 15);
 	//printf("allocating block of size %zu(%zu)\n", size, aligned);
 	region = g_storage->regions;
 	while (i < g_storage->regions_quantity && !blk)
@@ -121,9 +124,12 @@ void				*alloc(size_t size, enum e_size_type type)
 			zone = zone->next;
 		}
 	}
-	//printf("mapped: %zu\n", g_storage->total_mapped);
-	//printf("total_allocated: %zu\n", g_storage->total_allocated);
-	//printf("allocated: %p\n", blk);
+//	printf("mapped: %zu\n", g_storage->total_mapped);
+//	printf("total_allocated: %zu\n", g_storage->total_allocated);
+//	printf("allocated: %p\n", blk);
+	write(1, "allocated something ", 20);
+	ft_putnbr_fd((long long) blk, 1);
+	write(1, "\n", 1);
 	pthread_mutex_unlock(&g_mutex);
 	return (blk);
 }

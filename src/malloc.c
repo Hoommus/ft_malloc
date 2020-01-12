@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "ft_malloc.h"
+
 #include <stdio.h>
 
 pthread_mutex_t									g_mutex;
@@ -85,8 +86,6 @@ __attribute__((destructor)) static void	malloc_destroy(void)
 
 void											*malloc(size_t size)
 {
-	if (!g_storage)
-		malloc_init();
 	if (size == 0)
 		return (NULL);
 	if (size > BLK_SMALL_MAX)

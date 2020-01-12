@@ -82,7 +82,7 @@ struct								s_zone
 struct								s_region
 {
 	void			*start;
-	bool			is_full:1;
+	bool			is_free:1;
 	size_t			bytes_malloced:48;
 	size_t			bytes_mapped:48;
 	struct s_zone	*zones;
