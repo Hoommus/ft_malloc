@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "ft_malloc_private.h"
 #include <stdio.h>
 //int				region_register(struct s_region *region)
 //{
@@ -110,7 +110,8 @@ struct s_zone			*region_create_zone(struct s_region *region,
 	i = 1;
 	while (i < zone->table_size)
 	{
-		ft_bzero(zone->block_table + i, sizeof(struct s_block));
+		zone->block_table[i].size = 0;
+		zone->block_table[i].pointer = 0;
 		zone->block_table[i++].is_free = true;
 	}
 	return (zone);

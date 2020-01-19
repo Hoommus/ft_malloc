@@ -10,16 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "ft_malloc_private.h"
 #include <assert.h>
 #include <stdio.h>
 
 bool			free_large_region(struct s_region *region)
 {
+	int		ret;
 	assert(!region->zones);
 	assert(region->large);
 	assert(!region->large->next);
-	return (!munmap(region->start, region->bytes_mapped));
+	ret = munmap(region->start, region->bytes_mapped);
+	ft_bzero(region, sizeof(struct s_region));
+	return (!ret);
 }
 
 bool 			free_block(void *pointer)

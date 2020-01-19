@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "ft_malloc_private.h"
 
 void			*realloc(void *ptr, size_t new_size)
 {

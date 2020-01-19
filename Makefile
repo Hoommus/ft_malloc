@@ -23,7 +23,8 @@ FLAGS = -g \
         -Wextra \
         -Werror \
         -Wno-unknown-pragmas \
-        -fPIC
+        -fPIC \
+        -fvisibility=hidden
 #                    -lpthread
 
 SRC_DIR = ./src/
@@ -38,7 +39,10 @@ MALLOC_SRC = realloc.c \
              zones_management.c \
              allocator.c \
              free.c \
-             malloc.c
+             malloc.c \
+             allocator_reverse.c \
+             allocator_straight.c \
+             init.c
 
 HEADERS = -I includes/ -I $(LIB_DIR)
 

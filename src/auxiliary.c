@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_malloc.h"
+#include "ft_malloc_private.h"
 
 bool		ptr_seems_valid(void *ptr)
 {
