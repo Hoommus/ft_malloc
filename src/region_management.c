@@ -3,48 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   region_management.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/12/07 17:36:52 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/25 16:16:03 by vtarasiu         ###   ########.fr       */
+/*   Created: 2020/01/25 13:34:15 by vtarasiu          #+#    #+#             */
+/*   Updated: 2020/01/25 17:05:48 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc_private.h"
 #include <stdio.h>
-//int				region_register(struct s_region *region)
-//{
-//	struct s_region		*list;
-//
-//	list = g_storage->regions;
-//	if (!list)
-//		return (!(g_storage->regions = region));
-//	while (list->next)
-//		list = list->next;
-//	list->next = region;
-//	return (0);
-//}
-//
-//int				region_unregister(struct s_region *region)
-//{
-//	struct s_region		*swap;
-//	struct s_region		*prev;
-//	struct s_region		*list;
-//
-//	list = NULL;
-//	prev = g_storage->regions;
-//	if (prev)
-//		list = prev->next;
-//	if (prev && prev == region)
-//		g_storage->regions = list;
-//	while (list)
-//	{
-//		swap = list->next;
-//		if (list == region)
-//
-//	}
-//
-//}
 
 bool					in_region_bounds(struct s_region *region, void *ptr)
 {
@@ -83,7 +50,10 @@ struct s_zone			*region_create_zone(struct s_region *region,
 	if (type <= 0 || type >= BLK_LARGE ||
 		!(zone = find_space_for_zone(region, size)))
 		return (NULL);
-	table_size = ((size / (type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX)) * 2) % SHRT_MAX;
+	if (g_storage->get_block == get_block_straight)
+		table_size = ((size / (type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX)) * 2) % SHRT_MAX;
+	else
+		table_size = (size / (type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX)) % SHRT_MAX;
 	table_size = ALIGN_TO_PAGE(table_size * sizeof(struct s_block), g_storage->pagesize) / sizeof(struct s_block);
 	if (!(list = region->zones))
 		region->zones = zone;
@@ -93,18 +63,17 @@ struct s_zone			*region_create_zone(struct s_region *region,
 			list = list->next;
 		list->next = zone;
 	}
-	ft_bzero(zone, sizeof(struct s_zone));
-	zone->zone_magic = ZONE_MAGIC;
-	zone->table_size = table_size;
+	//ft_bzero(zone, sizeof(struct s_zone));
+	*zone = (struct s_zone){ZONE_MAGIC, type, false, true, 0, 0, size,
+		table_size, 1, 0, 0, NULL};
 	printf("table size: %d\n", zone->table_size);
 	printf("table address: %p\n", zone->block_table);
-	zone->is_free = true;
-	zone->type = type;
-	zone->zone_size = size;
-	zone->block_table[0].pointer = (size_t)zone + ALIGN_TO_ARCH(sizeof(*zone)) + zone->table_size * sizeof(struct s_block);
+	if (g_storage->get_block == get_block_straight)
+		zone->block_table[0].pointer = (size_t)zone + ALIGN_TO_ARCH(sizeof(*zone)) + zone->table_size * sizeof(struct s_block);
+	else
+		zone->block_table[0].pointer = (size_t)zone + size;
 	zone->block_table[0].is_free = false;
 	zone->block_table[0].size = 0;
-	zone->first_free_block_index = 1;
 	size_t		i;
 
 	i = 1;

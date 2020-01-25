@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   allocator_straight.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/25 16:55:13 by vtarasiu          #+#    #+#             */
+/*   Updated: 2020/01/25 16:55:13 by vtarasiu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "ft_malloc_private.h"
 #include <assert.h>
@@ -20,17 +31,17 @@ static inline size_t		next_free_block(struct s_zone *zone, size_t index)
 	zone->is_full = true;
 	return (i);
 }
-
-static void		block_allocate(struct s_zone *zone, struct s_block *blk, size_t size)
-{
-
-}
+//
+//static void		block_allocate(struct s_zone *zone, struct s_block *blk, size_t size)
+//{
+//
+//}
 
 /*
 ** I said `no homo', but it meant VERY HOMO
 */
 
-void				*get_block_straight(struct s_zone *zone, size_t size)
+void __attribute__ ((visibility("hidden")))				*get_block_straight(struct s_zone *zone, size_t size)
 {
 	size_t			i;
 	size_t			page_offset;

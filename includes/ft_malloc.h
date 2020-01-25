@@ -13,9 +13,9 @@
 #ifndef FT_MALLOC_H
 # define FT_MALLOC_H
 
-void	*malloc(size_t size);
-void	*realloc(void *ptr, size_t new_size);
-void	free(void *ptr);
-void	show_alloc_mem(void);
+void	*malloc(size_t size) __attribute__ ((visibility("default")));
+void	*realloc(void *ptr, size_t new_size) __attribute__ ((visibility("default")));
+void	free(void *ptr) __attribute__ ((visibility("default")));
+void	show_alloc_mem(void) __attribute__ ((visibility("default")));
 
 #endif

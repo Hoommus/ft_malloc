@@ -1,8 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_malloc_private.h                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
+/*   Updated: 2020/01/25 17:05:48 by vtarasiu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
 #ifndef FT_MALLOC_PRIVATE_H
-#define FT_MALLOC_PRIVATE_H
-
+# define FT_MALLOC_PRIVATE_H
 
 # include <stdint.h>
 # include <sys/mman.h>
@@ -23,7 +33,7 @@
 #  define ABS(x) ((x) < 0 ? -(x) : (x))
 # endif
 
-# define ALIGN_TO_PAGE(x, pgsz) ((x) + ABS((pgsz - x) % (pgsz)))
+# define ALIGN_TO_PAGE align_to_page
 # define ALIGN_TO_ARCH(x)       ((x) + ABS((ALIGNMENT - x) % ALIGNMENT))
 
 # define BLK_TINY_MAX 128
@@ -34,7 +44,7 @@
 
 # define BLOCK_TABLE_SIZE_MAGNITUDE
 
-# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 128) * 4
+# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 128)
 # define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
 
 # define PAGE_ADDRESS_MASK  0xFFFU // 12 bits of address space per page
@@ -64,10 +74,13 @@ struct								s_zone
 	enum e_size_type	type:3;
 	bool				is_full:1;
 	bool				is_free:1;
+	size_t				table_size_age:3;
 	size_t				bytes_malloced:48;
 	size_t				zone_size;
 	size_t				table_size:16;
 	size_t				first_free_block_index:16;
+	size_t				idx_leftmost;
+	size_t				idx_rightmost;
 	struct s_zone		*next;
 	struct s_block		block_table[]; // TODO: restrict size to page boundary
 } __attribute__((aligned(8)));
@@ -81,6 +94,7 @@ struct								s_region
 	size_t			bytes_mapped:48;
 	struct s_zone	*zones;
 	struct s_zone	*large;
+	struct s_region	*next;
 } __attribute__((aligned(8))); // 40 bytes
 
 struct								s_stats
@@ -123,4 +137,6 @@ bool								in_region_bounds(struct s_region *region, void *ptr);
 void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
 
-#endif //FT_MALLOC_FT_MALLOC_PRIVATE_H
+inline size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
+
+#endif //FT_MALLOC_PRIVATE_H

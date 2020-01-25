@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/25 16:55:23 by vtarasiu          #+#    #+#             */
+/*   Updated: 2020/01/25 16:57:14 by vtarasiu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "ft_malloc_private.h"
 #include <stdio.h>
@@ -39,7 +50,7 @@ __attribute__((constructor,used)) static void	malloc_init(void)
 	g_storage = mmap(0, pagesize, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	g_storage->map_start = g_storage;
 	g_storage->pagesize = pagesize;
-	g_storage->total_mapped = pagesize;
+	g_storage->total_mapped = pagesize + first_region_size;
 	g_storage->total_allocated = (void *)g_storage->regions - (void *)g_storage;
 	write(1, "mapped some storage\n", 20);
 	ft_bzero(g_storage->regions, sizeof(struct s_region));
@@ -48,7 +59,6 @@ __attribute__((constructor,used)) static void	malloc_init(void)
 	region_create(g_storage->regions + 0, g_storage->regions[0].start,
 				  ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize));
 	printf("first region created\n");
-	g_storage->total_mapped += first_region_size;
 	g_storage->regions[1].start = region_create(g_storage->regions + 1,
 		g_storage->regions[0].start + ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize),
 		ALIGN_TO_PAGE(REGION_SMALLIES_SIZE, pagesize));

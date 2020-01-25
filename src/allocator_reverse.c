@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   allocator_reverse.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
+/*   Updated: 2020/01/25 16:57:14 by vtarasiu         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
 #include "ft_malloc_private.h"
@@ -22,10 +33,15 @@ static inline size_t		next_free_block(struct s_zone *zone, size_t index)
 	return (i);
 }
 
-static void		block_allocate(struct s_zone *zone, struct s_block *blk, size_t size)
+static inline void			insert_to_table()
 {
 
 }
+
+//static void		block_allocate(struct s_zone *zone, struct s_block *blk, size_t size)
+//{
+//
+//}
 
 void			*get_block_reverse(struct s_zone *zone, size_t size)
 {
@@ -41,8 +57,8 @@ void			*get_block_reverse(struct s_zone *zone, size_t size)
 	if (size > g_storage->pagesize || zone->zone_size - zone->bytes_malloced < size)
 		return (NULL);
 	table = zone->block_table;
-	i = zone->table_size - 1;
-	while (--i)
+	i = 0;
+	while (++i)
 		if (table[i].pointer == 0 || table[i].is_free == true)
 		{
 			//printf("this pointer: %zx, last %zx\n", table[i].pointer, table[i - 1].pointer);

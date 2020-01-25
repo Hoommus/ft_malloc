@@ -17,3 +17,8 @@ void		show_alloc_mem(void)
 {
 	printf("hello\n");
 }
+
+void		show_region(struct s_region *region)
+{
+	printf("%p\n", region);
+}
