@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/01/25 17:05:48 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/08 12:19:45 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@
 
 # define BLOCK_TABLE_SIZE_MAGNITUDE
 
-# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 128)
+# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 256)
 # define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
 
 # define PAGE_ADDRESS_MASK  0xFFFU // 12 bits of address space per page
@@ -64,7 +64,7 @@ struct								s_block
 {
 	bool				is_free:1;
 	uint16_t			size:12;
-	size_t				pointer : 64; // TODO: 3 bits left
+	size_t				pointer : 48; // TODO: 3 bits left
 } __attribute__((packed,aligned(8)));
 
 // Zones contain blocks that will be returned via a malloc() call
@@ -137,6 +137,6 @@ bool								in_region_bounds(struct s_region *region, void *ptr);
 void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
 
-inline size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
+size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
 
 #endif //FT_MALLOC_PRIVATE_H

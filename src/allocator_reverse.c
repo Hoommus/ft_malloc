@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/01/25 16:57:14 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/08 12:18:00 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ static inline size_t		next_free_block(struct s_zone *zone, size_t index)
 	return (i);
 }
 
-static inline void			insert_to_table()
-{
-
-}
+//static inline void			insert_to_table()
+//{
+//
+//}
 
 //static void		block_allocate(struct s_zone *zone, struct s_block *blk, size_t size)
 //{
@@ -72,7 +72,6 @@ void			*get_block_reverse(struct s_zone *zone, size_t size)
 				possible_block = table + i;
 				continue ;
 			}
-			table[i].is_free = false;
 			table[i].pointer = table[i - 1].pointer + size;
 			table[i].size = size;
 			zone->first_free_block_index = next_free_block(zone, i);

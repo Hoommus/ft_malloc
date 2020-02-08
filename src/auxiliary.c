@@ -23,7 +23,7 @@ bool		ptr_seems_valid(void *ptr)
 	return (true);
 }
 
-inline size_t __attribute__((always_inline)) align_to_page(size_t size, size_t pagesize)
+size_t __attribute__((always_inline)) align_to_page(size_t size, size_t pagesize)
 {
 	return (size + ABS((pagesize - size) % pagesize));
 }

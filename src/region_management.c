@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:15 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/01/25 17:05:48 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/08 13:53:19 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ struct s_zone			*region_create_zone(struct s_region *region,
 		!(zone = find_space_for_zone(region, size)))
 		return (NULL);
 	if (g_storage->get_block == get_block_straight)
-		table_size = ((size / (type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX)) * 2) % SHRT_MAX;
+		table_size = ((size / (type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX))) % SHRT_MAX;
 	else
 		table_size = (size / (type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX)) % SHRT_MAX;
 	table_size = ALIGN_TO_PAGE(table_size * sizeof(struct s_block), g_storage->pagesize) / sizeof(struct s_block);
@@ -63,9 +63,8 @@ struct s_zone			*region_create_zone(struct s_region *region,
 			list = list->next;
 		list->next = zone;
 	}
-	//ft_bzero(zone, sizeof(struct s_zone));
-	*zone = (struct s_zone){ZONE_MAGIC, type, false, true, 0, 0, size,
-		table_size, 1, 0, 0, NULL};
+	*zone = (struct s_zone){ ZONE_MAGIC, type, false, true, 0, 0, size,
+		table_size, 1, 0, 0, NULL };
 	printf("table size: %d\n", zone->table_size);
 	printf("table address: %p\n", zone->block_table);
 	if (g_storage->get_block == get_block_straight)
@@ -74,14 +73,6 @@ struct s_zone			*region_create_zone(struct s_region *region,
 		zone->block_table[0].pointer = (size_t)zone + size;
 	zone->block_table[0].is_free = false;
 	zone->block_table[0].size = 0;
-	size_t		i;
-
-	i = 1;
-	while (i < zone->table_size)
-	{
-		zone->block_table[i].size = 0;
-		zone->block_table[i].pointer = 0;
-		zone->block_table[i++].is_free = true;
-	}
+	ft_bzero(zone->block_table + 1, sizeof(struct s_block) * zone->table_size);
 	return (zone);
 }

@@ -43,6 +43,9 @@ __attribute__((constructor,used)) static void	malloc_init(void)
 	int					pagesize;
 	size_t				first_region_size;
 
+	ft_putstr("size of block: ");
+	ft_putnbr(sizeof(struct s_block));
+	ft_putendl("");
 	pthread_mutex_init(&g_mutex, NULL);
 	pagesize = getpagesize();
 	first_region_size = REGION_TINIES_SIZE + REGION_SMALLIES_SIZE;
