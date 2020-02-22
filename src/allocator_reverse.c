@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/02/08 12:18:00 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/22 17:49:48 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,10 +79,10 @@ void			*get_block_reverse(struct s_zone *zone, size_t size)
 		return (NULL);
 	table = zone->block_table;
 	i = 0;
-	while (++i)
+	while (++i < zone->table_size)
 		if (table[i].pointer == 0)
 		{
-			write(1, "hello\n", 6);
+			//write(1, "hello\n", 6);
 			desired_ptr = table[i - 1].pointer - table[i - 1].size - size;
 			page_offset = (table[i - 1].pointer - table[i - 1].size) & PAGE_ADDRESS_MASK;
 			if (table[i + 1].pointer && table[i + 1].pointer < desired_ptr)

@@ -6,7 +6,7 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/02/08 12:19:45 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/22 17:47:00 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,8 @@ enum								e_size_type
 struct								s_block
 {
 	bool				is_free:1;
-	uint16_t			size:12;
-	size_t				pointer : 48; // TODO: 3 bits left
+	uint16_t			size:15;
+	size_t				pointer : 48;
 } __attribute__((packed,aligned(8)));
 
 // Zones contain blocks that will be returned via a malloc() call
@@ -126,6 +126,9 @@ struct								s_storage
 
 extern pthread_mutex_t				g_mutex;
 extern struct s_storage *restrict	g_storage;
+
+__attribute__((used)) void			malloc_init(void);
+
 
 bool								ptr_seems_valid(void *ptr);
 void								*alloc(size_t size, enum e_size_type type);

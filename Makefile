@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
+#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/07/12 14:31:34 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/12/25 17:11:06 by vtarasiu         ###   ########.fr        #
+#    Updated: 2020/02/22 18:05:04 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,8 +23,8 @@ FLAGS = -g \
         -Wextra \
         -Werror \
         -Wno-unknown-pragmas \
-        -fPIC \
-        -fvisibility=hidden
+        -fsanitize=address
+#        -fvisibility=hidden
 #                    -lpthread
 
 SRC_DIR = ./src/
@@ -51,13 +51,13 @@ OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
-	$(CC) $(FLAGS) -flto --shared -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
+	$(CC) $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
 	@if ! [ -f libft_malloc.so ] ; then \
 	    /bin/ln -s $(NAME) libft_malloc.so ; \
 	fi
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	$(CC) $(FLAGS) $(HEADERS) -o $@ -c $< ;
+	$(CC) $(FLAGS) -fPIC $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)

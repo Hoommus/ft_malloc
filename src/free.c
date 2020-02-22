@@ -57,7 +57,7 @@ void	free(void *ptr)
 	if (!free_block(ptr))
 	{
 		//printf("**** pointer being freed was not allocated: %p\n", ptr);
-		write(1, "hello from free\n", 15);
+		write(1, "hello from free \n", 16);
 		ft_putnbr((int)ptr);
 		ft_putchar('\n');
 		abort();

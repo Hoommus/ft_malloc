@@ -6,12 +6,11 @@
 /*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:55:23 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/01/25 16:57:14 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/22 17:50:42 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc_private.h"
-#include <stdio.h>
 
 struct s_region									*region_create(struct s_region *region, void *start, size_t size)
 {
@@ -25,7 +24,7 @@ static void										read_env(void)
 {
 	char	*var;
 
-	if ((var = getenv("FTMALLOC_ALLOCATOR")) && ft_strcmp(var, "reverse"))
+	if ((var = getenv("FTMALLOC_ALLOCATOR")) && !ft_strcmp(var, "reverse"))
 	{
 		g_storage->get_block = get_block_reverse;
 		g_storage->flags |= FLAG_REVERSE_ALLOCATOR;
@@ -35,10 +34,14 @@ static void										read_env(void)
 	// THRESHOLD at which malloc will proceed directly to mmap
 	if ((var = getenv("FTMALLOC_THRESHOLD")) && ft_atoi(var) > 8)
 		g_storage->threshold = ft_atoi_base(var, 10);
-
+	ft_putstr("allocator is ");
+	if (g_storage->get_block == get_block_reverse)
+		ft_putstr("reverse\n");
+	else
+		ft_putstr("straight\n");
 }
 
-__attribute__((constructor,used)) static void	malloc_init(void)
+__attribute__((used))void	malloc_init(void)
 {
 	int					pagesize;
 	size_t				first_region_size;
@@ -61,7 +64,6 @@ __attribute__((constructor,used)) static void	malloc_init(void)
 									   PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	region_create(g_storage->regions + 0, g_storage->regions[0].start,
 				  ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize));
-	printf("first region created\n");
 	g_storage->regions[1].start = region_create(g_storage->regions + 1,
 		g_storage->regions[0].start + ALIGN_TO_PAGE(REGION_TINIES_SIZE, pagesize),
 		ALIGN_TO_PAGE(REGION_SMALLIES_SIZE, pagesize));

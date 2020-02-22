@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   malloc.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:25:04 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/25 16:13:51 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/02/22 17:34:24 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,10 +42,14 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 	munmap(g_storage->map_start, g_storage->pagesize);
 	pthread_mutex_unlock(&g_mutex);
 	pthread_mutex_destroy(&g_mutex);
+	ft_putstr("destroyed\n");
 }
 
 void											*malloc(size_t size)
 {
+	if (!g_storage)
+		malloc_init();
+	ft_putstr("inside our malloc\n");
 	if (size == 0)
 		return (NULL);
 	if (size > BLK_SMALL_MAX)

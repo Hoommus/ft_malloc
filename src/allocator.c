@@ -12,6 +12,7 @@
 
 #include "ft_malloc_private.h"
 #include <stdio.h>
+#include <assert.h>
 
 void				*alloc_largie(size_t size)
 {
@@ -69,5 +70,6 @@ void				*alloc(size_t size, enum e_size_type type)
 	ft_putnbr_fd((long long) blk, 1);
 	write(1, "\n", 1);
 	pthread_mutex_unlock(&g_mutex);
+	assert((size_t)blk % 8 == 0);
 	return (blk);
 }
