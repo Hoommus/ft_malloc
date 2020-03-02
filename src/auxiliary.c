@@ -12,7 +12,7 @@
 
 #include "ft_malloc_private.h"
 
-bool		ptr_seems_valid(void *ptr)
+bool									ptr_seems_valid(void *ptr)
 {
 #if __POINTER_WIDTH__ == 64
 	if (((size_t)ptr) & ADDRESS_SPACE_HEADER)
@@ -23,7 +23,56 @@ bool		ptr_seems_valid(void *ptr)
 	return (true);
 }
 
-size_t __attribute__((always_inline)) align_to_page(size_t size, size_t pagesize)
+size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize)
 {
 	return (size + ABS((pagesize - size) % pagesize));
+}
+
+void									print_hex_nbr(uint64_t n)
+{
+	static const char	alphabet[17] = "0123456789abcdef";
+	char				line[2 + 16 + 1];
+	size_t				i;
+	
+	ft_bzero(line, sizeof(line));
+	line[0] = '0';
+	line[1] = 'x';
+	i = 17;
+	while (i >= 2)
+	{
+		line[i--] = alphabet[n % 16];
+		n /= 16;
+	}
+	ft_putstr(line);
+}
+
+void									print_hex_dump(void *ptr, size_t len, bool print_address)
+{
+	static const char	alphabet[17] = "0123456789abcdef";
+	char				linebuf[64 + 32 + 1];
+	size_t				i;
+	size_t				j;
+
+	ft_bzero(linebuf, sizeof(linebuf));
+	i = -1;
+	j = 0;
+	while (++i < len)
+	{
+		linebuf[j + 2] = ' ';
+		linebuf[j + 1] = alphabet[((uint8_t *)ptr)[i] & 0xf];
+		linebuf[j + 0] = alphabet[(((uint8_t *)ptr)[i] >> 4) & 0xf];
+		if (i && i % 32 == 0)
+		{
+			linebuf[sizeof(linebuf) - 1] = 0;
+			if (print_address)
+			{
+				print_hex_nbr((uint64_t)(ptr + i - 32));
+				ft_putstr(": ");
+			}
+			ft_putendl(linebuf);
+			ft_bzero(linebuf, sizeof(linebuf));
+			j = -3;
+		}
+		j += 3;
+	}
 }

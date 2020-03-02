@@ -38,7 +38,7 @@
 
 # define BLK_TINY_MAX 128
 # define BLK_SMALL_MAX 128 * 1024
-# define BLK_LARGE_MAX
+# define BLK_LARGE_MAX 128 * 1024 * 1024
 
 # define BLOCK_MIN_SIZE 16
 
@@ -77,8 +77,8 @@ struct								s_zone
 	size_t				table_size_age:3;
 	size_t				bytes_malloced:48;
 	size_t				zone_size;
-	size_t				table_size:16;
-	size_t				first_free_block_index:16;
+	size_t				table_size;
+	size_t				first_free_block_index;
 	size_t				idx_leftmost;
 	size_t				idx_rightmost;
 	struct s_zone		*next;
@@ -138,5 +138,7 @@ void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
 
 size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
+void									print_hex_dump(void *ptr, size_t len, bool print_address);
+void									print_hex_nbr(uint64_t n);
 
 #endif //FT_MALLOC_PRIVATE_H

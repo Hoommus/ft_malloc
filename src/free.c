@@ -17,6 +17,7 @@
 bool			free_large_region(struct s_region *region)
 {
 	int		ret;
+	
 	assert(!region->zones);
 	assert(region->large);
 	assert(!region->large->next);
@@ -25,10 +26,19 @@ bool			free_large_region(struct s_region *region)
 	return (!ret);
 }
 
-bool 			free_block(void *pointer)
+static bool		free_block(struct s_block *blk)
+{
+	blk->is_free = true;
+	blk->pointer = 0;
+	blk->size = 0;
+	return (true);
+}
+
+bool 			free_ptr(void *pointer)
 {
 	struct s_zone	*zone;
 	size_t			i;
+	void 			*cmp;
 
 	zone = NULL;
 	i = -1;
@@ -45,8 +55,24 @@ bool 			free_block(void *pointer)
 		}
 	i = -1;
 	while (zone && ++i < zone->table_size)
-		if ((void *)zone->block_table[i].pointer == pointer)
-			return (zone->block_table[i].is_free = true);
+	{
+		if (zone->block_table[i].pointer != 0)
+		{
+			ft_putstr("  trying to free ");
+			print_hex_nbr((uint64_t)pointer);
+			ft_putstr(" against ");
+			print_hex_nbr(zone->block_table[i].pointer);
+			ft_putendl("");
+		}
+		cmp = (void *)zone->block_table[i].pointer;
+		if (g_storage->get_block == get_block_reverse)
+			cmp -= 0;// zone->block_table[i].size;
+		if (cmp == pointer)
+		{
+			ft_putendl("    success");	
+			return (free_block(zone->block_table + i));
+		}
+	}
 	return (false);
 }
 
@@ -54,12 +80,10 @@ void	free(void *ptr)
 {
 	if (!ptr)
 		return ;
-	if (!free_block(ptr))
+	if (!free_ptr(ptr))
 	{
-		//printf("**** pointer being freed was not allocated: %p\n", ptr);
-		write(1, "hello from free\n", 15);
-		ft_putnbr((int)ptr);
+		ft_putstr(" - error from free\n");
+		print_hex_nbr((uint64_t)ptr);
 		ft_putchar('\n');
-		abort();
 	}
 }

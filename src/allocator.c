@@ -49,24 +49,21 @@ void				*alloc(size_t size, enum e_size_type type)
 	i = 0;
 	write(1, "Locking mutex\n", 14);
 	pthread_mutex_lock(&g_mutex);
-	write(1, "Inside alloc 2\n", 15);
-	//printf("allocating block of size %zu(%zu)\n", size, aligned);
+	ft_putstr("  Inside alloc 2\n");
 	region = g_storage->regions;
 	while (i < g_storage->regions_quantity && !blk)
 	{
 		zone = region[i++].zones;
 		while (zone)
 		{
-			if (!zone->is_full && (blk = g_storage->get_block(zone, aligned)))
+			ft_putstr("zone chosen, looking for block\n");
+			if (!zone->is_full && (blk = get_block_reverse(zone, aligned)))
 				break ;
 			zone = zone->next;
 		}
 	}
-//	printf("mapped: %zu\n", g_storage->total_mapped);
-//	printf("total_allocated: %zu\n", g_storage->total_allocated);
-//	printf("allocated: %p\n", blk);
-	write(1, "allocated something ", 20);
-	ft_putnbr_fd((long long) blk, 1);
+	ft_putstr("allocated something ");
+	print_hex_nbr((uint64_t)blk);
 	write(1, "\n", 1);
 	pthread_mutex_unlock(&g_mutex);
 	return (blk);

@@ -15,9 +15,14 @@
 
 bool					in_region_bounds(struct s_region *region, void *ptr)
 {
-	if (ptr < (void *)region)
+	ft_putstr("region: ");
+	ft_putnbr((long long)region);
+	ft_putstr(", ");
+	ft_putnbr((long long)region + region->bytes_mapped);
+	ft_putchar('\n');
+	if (ptr < (void *)region->start)
 		return (false);
-	if (ptr > (void *)region + region->bytes_mapped)
+	if (ptr > (void *)((char *)region->start + region->bytes_mapped))
 		return (false);
 	return (true);
 }
@@ -46,15 +51,20 @@ struct s_zone			*region_create_zone(struct s_region *region,
 	struct s_zone	*list;
 	struct s_zone	*zone;
 	size_t			table_size;
+	size_t			table_size_bytes;
 
 	if (type <= 0 || type >= BLK_LARGE ||
 		!(zone = find_space_for_zone(region, size)))
 		return (NULL);
-	if (g_storage->get_block == get_block_straight)
-		table_size = ((size / (type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX))) % SHRT_MAX;
+	if (type == BLK_TINY)
+		table_size = size / BLOCK_MIN_SIZE;
 	else
-		table_size = (size / (type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX)) % SHRT_MAX;
-	table_size = ALIGN_TO_PAGE(table_size * sizeof(struct s_block), g_storage->pagesize) / sizeof(struct s_block);
+		table_size = size / BLK_TINY_MAX;
+//	table_size = (size / (type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX));
+	ft_putstr("  requested table size: "); 
+	ft_putnbr(table_size);
+	ft_putendl("");
+	table_size_bytes = table_size * sizeof(struct s_block);
 	if (!(list = region->zones))
 		region->zones = zone;
 	else
@@ -63,16 +73,17 @@ struct s_zone			*region_create_zone(struct s_region *region,
 			list = list->next;
 		list->next = zone;
 	}
-	*zone = (struct s_zone){ ZONE_MAGIC, type, false, true, 0, 0, size,
-		table_size, 1, 0, 0, NULL };
-	printf("table size: %d\n", zone->table_size);
-	printf("table address: %p\n", zone->block_table);
-	if (g_storage->get_block == get_block_straight)
-		zone->block_table[0].pointer = (size_t)zone + ALIGN_TO_ARCH(sizeof(*zone)) + zone->table_size * sizeof(struct s_block);
-	else
-		zone->block_table[0].pointer = (size_t)zone + size;
+	*zone = (struct s_zone){ZONE_MAGIC, type, false, true, 0, 0, 
+							size, table_size, 1, 0, 0, NULL };
+	ft_putstr("table size: ");
+	ft_putnbr((uint64_t)zone->table_size);
+	ft_putstr(" table address: ");
+	print_hex_nbr((uint64_t)zone->block_table);
+	ft_putchar('\n');
+	ft_bzero(zone->block_table, table_size_bytes);	
+	zone->block_table[0].pointer = (size_t)zone + size;
 	zone->block_table[0].is_free = false;
 	zone->block_table[0].size = 0;
-	ft_bzero(zone->block_table + 1, sizeof(struct s_block) * zone->table_size);
+	print_hex_dump(zone->block_table, 128, true);
 	return (zone);
 }

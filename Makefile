@@ -22,9 +22,7 @@ FLAGS = -g \
         -Wall \
         -Wextra \
         -Werror \
-        -Wno-unknown-pragmas \
-        -fPIC \
-        -fvisibility=hidden
+        -Wno-unknown-pragmas
 #                    -lpthread
 
 SRC_DIR = ./src/
@@ -51,13 +49,13 @@ OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
-	$(CC) $(FLAGS) -flto --shared -o $(NAME) $(addprefix $(SRC_DIR), $(MALLOC_SRC)) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
+	$(CC) $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
 	@if ! [ -f libft_malloc.so ] ; then \
 	    /bin/ln -s $(NAME) libft_malloc.so ; \
 	fi
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	$(CC) $(FLAGS) $(HEADERS) -o $@ -c $< ;
+	$(CC) -fPIC $(FLAGS) $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)
