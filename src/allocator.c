@@ -33,6 +33,8 @@ void				*alloc_largie(size_t size)
 	return (region->large);
 }
 
+#include <sys/types.h>
+#include <signal.h>
 void				*alloc(size_t size, enum e_size_type type)
 {
 	size_t			aligned;
@@ -54,9 +56,13 @@ void				*alloc(size_t size, enum e_size_type type)
 	while (i < g_storage->regions_quantity && !blk)
 	{
 		zone = region[i++].zones;
-		while (zone)
+		while (zone && zone->type == type)
 		{
-			ft_putstr("zone chosen, looking for block\n");
+			ft_putstr("zone chosen, looking for block\nzone: ");
+			print_hex_nbr((uint64_t)zone);
+			ft_putendl("");
+			if (zone->zone_magic != ZONE_MAGIC)
+				kill(0, 1);
 			if (!zone->is_full && (blk = get_block_reverse(zone, aligned)))
 				break ;
 			zone = zone->next;

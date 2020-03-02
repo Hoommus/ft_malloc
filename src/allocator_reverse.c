@@ -71,9 +71,12 @@ static inline struct s_block	*block_allocate(struct s_zone *zone, size_t idx,
 	blk = zone->block_table + idx;
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
+	print_hex_dump(zone->block_table, 256, true);		
 	if (!(blk->pointer > (size_t)(zone->block_table + zone->table_size) 
 					&& blk->pointer <= (size_t)(zone + zone->zone_size)))
+	{
 		abort();
+	};
 	return (blk);
 }
 
@@ -95,7 +98,7 @@ void							*get_block_reverse(struct s_zone *zone, size_t size)
 	while (++i < zone->table_size)
 		if (table[i].pointer == 0)
 		{
-			desired_ptr = table[i - 1].pointer - size;
+			desired_ptr = (size_t)table[i - 1].pointer - size;
 			page_offset = desired_ptr & 0xfff;
 			if (table[i + 1].pointer &&
 				table[i + 1].pointer + table[i + 1].size < desired_ptr)
@@ -109,5 +112,5 @@ void							*get_block_reverse(struct s_zone *zone, size_t size)
 			return ((void *)(block_allocate(zone, i, desired_ptr, size)->pointer));
 		}
 	ft_putstr(" hello from reverse allocator\n");
-	return ((void *)block_allocate(zone, possible_block_idx, 0, size));
+	return ((void *)block_allocate(zone, possible_block_idx, 0, size)->pointer);
 }
