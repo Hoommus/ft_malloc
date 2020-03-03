@@ -82,7 +82,6 @@ struct s_zone			*region_create_zone(struct s_region *region,
 	ft_putchar('\n');
 	ft_bzero(zone->block_table, table_size_bytes);	
 	zone->block_table[0].pointer = (size_t)zone + size;
-	zone->block_table[0].is_free = false;
 	zone->block_table[0].size = 0;
 	print_hex_dump(zone->block_table, 128, true);
 	return (zone);

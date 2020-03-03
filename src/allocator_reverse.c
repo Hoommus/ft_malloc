@@ -24,7 +24,7 @@ size_t							next_free_block(struct s_zone *zone, size_t index)
 	i = index;
 	while (i < zone->table_size)
 	{
-		if (table[i].is_free)
+		if (!table[i].pointer)
 			return (i);
 		i++;
 	}
@@ -32,30 +32,75 @@ size_t							next_free_block(struct s_zone *zone, size_t index)
 	return (i);
 }
 
-/*
-**
-*/
-
-void				fix_table(struct s_zone *zone, size_t pivot)
+static void						insert_block(struct s_zone *zone, size_t pivot)
 {
 	struct s_block	*next;
 	struct s_block	*blk;
-	//const size_t	cmp = zone->type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX;
+	const size_t	cmp = zone->type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX;
+	size_t			gap;
 
 	next = zone->block_table + pivot + 1;
+	if (!next->pointer)
+		zone->idx_rightmost = pivot + 1;
 	if (!pivot || pivot >= zone->table_size - 1 || !next->pointer)
 		return ;
 	blk = zone->block_table + pivot;
 	// TODO: if pivot + 1 exists, then
-	//           calculate the difference and if it is small, make current block bigger to fill the space
+	//           calculate the difference and if it is small, make current block bigger to fill up the space
 	//       else
 	//           move pivot + 1 and create block with pointer 0
-//	if (blk->pointer + blk->size - next->pointer >= cmp)
-//	{
-//		ft_putendl("moving memory");
-//		ft_memmove(zone->block_table + pivot + 2, zone->block_table + pivot + 1, 
-//					sizeof(struct s_block) * (zone->table_size - pivot - 1));
-//	}
+	gap = blk->pointer + blk->size - next->pointer;
+	if (gap >= cmp && zone->zone_size - zone->idx_rightmost > 0) // then make space for another block
+	{
+		ft_memmove(zone->block_table + pivot + 2, zone->block_table + pivot + 1, 
+					sizeof(struct s_block) * (zone->table_size - pivot - 1));
+		ft_bzero(zone->block_table + pivot + 1, sizeof(struct s_block));
+	}
+	else 
+		blk->size = blk->size + gap;
+}
+
+int 							memcmp_pattern(const void *p, const void *pattern,
+	size_t pattern_sizeof, size_t len)
+{
+	size_t		i;
+	
+	i = 0;
+	if (pattern_sizeof > len)
+		return (-1);
+	while (i < len)
+	{
+		if (!ft_memcmp(p + pattern_sizeof, pattern, pattern_sizeof))
+			return (1);
+		p += pattern_sizeof;
+	}
+	return (0);
+}
+
+void				fix_table_size(struct s_zone *zone)
+{
+	size_t			table_size;
+	size_t			min_table_size;
+	const size_t	table_size_bytes = zone->table_size * sizeof(struct s_block);
+	struct s_block	pattern;
+
+	pattern = (struct s_block){0};
+	if (zone->type == BLK_TINY)
+	{
+		table_size = table_size_bytes / BLOCK_MIN_SIZE;
+		min_table_size = table_size_bytes / BLK_TINY_MAX;
+	}
+	else
+	{
+		table_size = table_size_bytes / BLK_TINY_MAX;	
+		min_table_size = table_size_bytes / BLK_SMALL_MAX;
+	}
+	if (table_size > min_table_size && table_size < zone->table_size
+		&& !memcmp_pattern(zone->block_table, &pattern, 
+		sizeof(pattern), sizeof(pattern) * (zone->table_size - table_size)))
+		zone->table_size = table_size;
+	else if (table_size > min_table_size && table_size > zone->table_size)
+		zone->table_size = table_size; // TODO: check for any allocated blocks in that memory part
 }
 
 static inline struct s_block	*block_allocate(struct s_zone *zone, size_t idx, 
@@ -72,11 +117,13 @@ static inline struct s_block	*block_allocate(struct s_zone *zone, size_t idx,
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
 	print_hex_dump(zone->block_table, 256, true);		
-	if (!(blk->pointer > (size_t)(zone->block_table + zone->table_size) 
-					&& blk->pointer <= (size_t)(zone + zone->zone_size)))
-	{
-		abort();
-	};
+	assert(blk->pointer > (size_t)(zone->block_table + zone->table_size) 
+					&& blk->pointer <= (size_t)(zone + zone->zone_size));
+	insert_block(zone, idx);
+	if (zone->table_size_age < 8)
+		zone->table_size_age++;
+	else
+		fix_table_size(zone);
 	return (blk);
 }
 
@@ -98,6 +145,7 @@ void							*get_block_reverse(struct s_zone *zone, size_t size)
 	while (++i < zone->table_size)
 		if (table[i].pointer == 0)
 		{
+			// TODO: check if there is space
 			desired_ptr = (size_t)table[i - 1].pointer - size;
 			page_offset = desired_ptr & 0xfff;
 			if (table[i + 1].pointer &&

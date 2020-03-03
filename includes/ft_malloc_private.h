@@ -37,12 +37,10 @@
 # define ALIGN_TO_ARCH(x)       ((x) + ABS((ALIGNMENT - x) % ALIGNMENT))
 
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX 128 * 1024
-# define BLK_LARGE_MAX 128 * 1024 * 1024
+# define BLK_SMALL_MAX ((1 << 17) - 1)
+# define BLK_LARGE_MAX (128 * 1024 * 1024)
 
 # define BLOCK_MIN_SIZE 16
-
-# define BLOCK_TABLE_SIZE_MAGNITUDE
 
 # define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 256)
 # define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
@@ -62,8 +60,7 @@ enum								e_size_type
 
 struct								s_block
 {
-	bool				is_free:1;
-	uint16_t			size:12;
+	uint16_t			size:16;
 	size_t				pointer : 48; // TODO: 3 bits left
 } __attribute__((packed,aligned(8)));
 

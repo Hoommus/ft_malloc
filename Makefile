@@ -39,7 +39,6 @@ MALLOC_SRC = realloc.c \
              free.c \
              malloc.c \
              allocator_reverse.c \
-             allocator_straight.c \
              init.c
 
 HEADERS = -I includes/ -I $(LIB_DIR)

@@ -28,12 +28,12 @@ bool			free_large_region(struct s_region *region)
 
 static bool		free_block(struct s_block *blk)
 {
-	blk->is_free = true;
 	blk->pointer = 0;
 	blk->size = 0;
 	return (true);
 }
 
+// TODO: add table_size_age alterations
 bool 			free_ptr(void *pointer)
 {
 	struct s_zone	*zone;
@@ -53,7 +53,7 @@ bool 			free_ptr(void *pointer)
 			else
 				return (free_large_region(g_storage->regions + i));
 		}
-	i = -1;
+	i = 0;
 	while (zone && ++i < zone->table_size)
 	{
 		if (zone->block_table[i].pointer != 0)
@@ -65,13 +65,8 @@ bool 			free_ptr(void *pointer)
 			ft_putendl("");
 		}
 		cmp = (void *)zone->block_table[i].pointer;
-		if (g_storage->get_block == get_block_reverse)
-			cmp -= 0;// zone->block_table[i].size;
 		if (cmp == pointer)
-		{
-			ft_putendl("    success");	
 			return (free_block(zone->block_table + i));
-		}
 	}
 	return (false);
 }
