@@ -18,8 +18,6 @@ size_t							next_free_block(struct s_zone *zone, size_t index)
 	size_t			i;
 	struct s_block	*table;
 
-	if (zone->block_table[index + 1].pointer == 0)
-		return (index + 1);
 	table = zone->block_table;
 	i = index;
 	while (i < zone->table_size)
@@ -40,17 +38,11 @@ static void						insert_block(struct s_zone *zone, size_t pivot)
 	size_t			gap;
 
 	next = zone->block_table + pivot + 1;
-	if (!next->pointer)
-		zone->idx_rightmost = pivot + 1;
 	if (!pivot || pivot >= zone->table_size - 1 || !next->pointer)
 		return ;
 	blk = zone->block_table + pivot;
-	// TODO: if pivot + 1 exists, then
-	//           calculate the difference and if it is small, make current block bigger to fill up the space
-	//       else
-	//           move pivot + 1 and create block with pointer 0
 	gap = blk->pointer + blk->size - next->pointer;
-	if (gap >= cmp && zone->zone_size - zone->idx_rightmost > 0) // then make space for another block
+	if (gap >= cmp && zone->table_bound - pivot > 2)
 	{
 		ft_memmove(zone->block_table + pivot + 2, zone->block_table + pivot + 1, 
 					sizeof(struct s_block) * (zone->table_size - pivot - 1));
@@ -63,14 +55,11 @@ static void						insert_block(struct s_zone *zone, size_t pivot)
 int 							memcmp_pattern(const void *p, const void *pattern,
 	size_t pattern_sizeof, size_t len)
 {
-	size_t		i;
-	
-	i = 0;
-	if (pattern_sizeof > len)
+	if (pattern_sizeof > len || len % pattern_sizeof != 0)
 		return (-1);
-	while (i < len)
+	while (len -= pattern_sizeof)
 	{
-		if (!ft_memcmp(p + pattern_sizeof, pattern, pattern_sizeof))
+		if (ft_memcmp(p, pattern, pattern_sizeof))
 			return (1);
 		p += pattern_sizeof;
 	}
@@ -84,7 +73,9 @@ void				fix_table_size(struct s_zone *zone)
 	const size_t	table_size_bytes = zone->table_size * sizeof(struct s_block);
 	struct s_block	pattern;
 
-	pattern = (struct s_block){0};
+	ft_bzero(&pattern, sizeof(pattern));
+	ft_putstr("+++++ fixing table size from ");
+	ft_putnbr(zone->table_size);
 	if (zone->type == BLK_TINY)
 	{
 		table_size = table_size_bytes / BLOCK_MIN_SIZE;
@@ -95,36 +86,87 @@ void				fix_table_size(struct s_zone *zone)
 		table_size = table_size_bytes / BLK_TINY_MAX;	
 		min_table_size = table_size_bytes / BLK_SMALL_MAX;
 	}
-	if (table_size > min_table_size && table_size < zone->table_size
-		&& !memcmp_pattern(zone->block_table, &pattern, 
-		sizeof(pattern), sizeof(pattern) * (zone->table_size - table_size)))
+	if (table_size < min_table_size)
+		return ;
+	if (table_size < zone->table_size 
+		&& !memcmp_pattern(zone->block_table + table_size, &pattern, 
+			sizeof(pattern), sizeof(pattern) * (zone->table_size - table_size - 1)))
 		zone->table_size = table_size;
-	else if (table_size > min_table_size && table_size > zone->table_size)
+	else if (table_size > zone->table_size)
 		zone->table_size = table_size; // TODO: check for any allocated blocks in that memory part
+	zone->table_size_age = 0;
+	ft_putstr(" to ");
+	ft_putnbr(zone->table_size);
+	ft_putendl("");
 }
 
-static inline struct s_block	*block_allocate(struct s_zone *zone, size_t idx, 
+static void 					place_bounds(struct s_zone *zone, size_t pivot)
+{
+	const struct s_block	*table = zone->block_table;
+	const size_t			size = zone->table_size;
+	size_t					new_block_idx;
+	size_t 					new_table_bound;
+
+	ft_putstr("==== old bounds: ");
+	ft_putnbr(pivot);
+	ft_putstr(" first free block: ");
+	ft_putnbr(zone->first_free_block_index);
+	ft_putstr(" table bound: ");	
+	ft_putnbr(zone->table_bound);
+	ft_putendl("");
+	new_block_idx = zone->first_free_block_index;
+	new_table_bound = zone->table_bound;
+	while (pivot < size)
+	{
+		if (table[pivot].pointer == 0)
+		{
+			if (pivot < zone->table_bound)
+				new_block_idx = pivot;
+			else if (pivot > zone->first_free_block_index &&
+					pivot > new_block_idx &&	
+					pivot < zone->table_size)
+				new_table_bound = pivot;
+		}
+		if (new_block_idx != zone->first_free_block_index && 
+			new_table_bound != zone->table_bound)
+			break ;
+		pivot++;
+	}
+	ft_putstr("==== new bounds: ");
+	ft_putstr(" first free block: ");
+	ft_putnbr(zone->first_free_block_index);
+	ft_putstr(" table bound: ");	
+	ft_putnbr(zone->table_bound);
+	ft_putendl("");
+	// TODO: fix zone->zone_size value 
+}
+
+static inline void	*block_allocate(struct s_zone *zone, size_t idx, 
 				size_t ptr, size_t size)
 {
 	struct s_block	*prev;
 	struct s_block	*blk;
 
-	ft_putstr("allocating block ");
-	print_hex_nbr(ptr);
-	ft_putendl("");
+	if (idx == 0)
+		return (NULL);
 	prev = zone->block_table + idx - 1;
 	blk = zone->block_table + idx;
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
-	print_hex_dump(zone->block_table, 256, true);		
+	ft_putstr("allocating block ");
+	print_hex_nbr(blk->pointer);
+	ft_putendl("");
+	//print_hex_dump(zone->block_table, 256, true);		
 	assert(blk->pointer > (size_t)(zone->block_table + zone->table_size) 
-					&& blk->pointer <= (size_t)(zone + zone->zone_size));
+					&& blk->pointer <= (size_t)zone + zone->zone_size);
 	insert_block(zone, idx);
+	place_bounds(zone, idx);
+	zone->bytes_malloced += blk->size;
 	if (zone->table_size_age < 8)
 		zone->table_size_age++;
 	else
 		fix_table_size(zone);
-	return (blk);
+	return ((void *)blk->pointer);
 }
 
 void							*get_block_reverse(struct s_zone *zone, size_t size)
@@ -141,24 +183,24 @@ void							*get_block_reverse(struct s_zone *zone, size_t size)
 	if (size > BLK_SMALL_MAX || zone->zone_size - zone->bytes_malloced < size)
 		return (NULL);
 	table = zone->block_table;
-	i = 0;
+	i = zone->first_free_block_index - 1;
 	while (++i < zone->table_size)
 		if (table[i].pointer == 0)
 		{
-			// TODO: check if there is space
 			desired_ptr = (size_t)table[i - 1].pointer - size;
 			page_offset = desired_ptr & 0xfff;
 			if (table[i + 1].pointer &&
 				table[i + 1].pointer + table[i + 1].size < desired_ptr)
 				continue ;
+			if ((size_t)(table + zone->table_size) >= desired_ptr)
+				break ;
 			if (page_offset + size >= g_storage->pagesize)
 			{
 				if (!possible_block_idx)
 					possible_block_idx = i;
 				continue ;
 			}
-			return ((void *)(block_allocate(zone, i, desired_ptr, size)->pointer));
+			return (block_allocate(zone, i, desired_ptr, size));
 		}
-	ft_putstr(" hello from reverse allocator\n");
-	return ((void *)block_allocate(zone, possible_block_idx, 0, size)->pointer);
+	return (block_allocate(zone, possible_block_idx, 0, size));
 }

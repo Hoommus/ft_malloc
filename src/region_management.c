@@ -74,7 +74,7 @@ struct s_zone			*region_create_zone(struct s_region *region,
 		list->next = zone;
 	}
 	*zone = (struct s_zone){ZONE_MAGIC, type, false, true, 0, 0, 
-							size, table_size, 1, 0, 0, NULL };
+							size, table_size, 1, 0, 0 };
 	ft_putstr("table size: ");
 	ft_putnbr((uint64_t)zone->table_size);
 	ft_putstr(" table address: ");

@@ -71,13 +71,12 @@ struct								s_zone
 	enum e_size_type	type:3;
 	bool				is_full:1;
 	bool				is_free:1;
-	size_t				table_size_age:3;
+	size_t				table_size_age:5;
 	size_t				bytes_malloced:48;
 	size_t				zone_size;
 	size_t				table_size;
+	size_t				table_bound;
 	size_t				first_free_block_index;
-	size_t				idx_leftmost;
-	size_t				idx_rightmost;
 	struct s_zone		*next;
 	struct s_block		block_table[]; // TODO: restrict size to page boundary
 } __attribute__((aligned(8)));
@@ -91,7 +90,6 @@ struct								s_region
 	size_t			bytes_mapped:48;
 	struct s_zone	*zones;
 	struct s_zone	*large;
-	struct s_region	*next;
 } __attribute__((aligned(8))); // 40 bytes
 
 struct								s_stats

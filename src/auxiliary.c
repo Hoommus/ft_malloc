@@ -58,21 +58,18 @@ void									print_hex_dump(void *ptr, size_t len, bool print_address)
 	j = 0;
 	while (++i < len)
 	{
-		linebuf[j + 2] = ' ';
-		linebuf[j + 1] = alphabet[((uint8_t *)ptr)[i] & 0xf];
-		linebuf[j + 0] = alphabet[(((uint8_t *)ptr)[i] >> 4) & 0xf];
+		linebuf[j++] = alphabet[(((uint8_t *)ptr)[i] >> 4) & 0xf];
+		linebuf[j++] = alphabet[((uint8_t *)ptr)[i] & 0xf];
+		linebuf[j++] = ' ';
 		if (i && i % 32 == 0)
 		{
 			linebuf[sizeof(linebuf) - 1] = 0;
 			if (print_address)
-			{
 				print_hex_nbr((uint64_t)(ptr + i - 32));
-				ft_putstr(": ");
-			}
+			ft_putchar(' ');
 			ft_putendl(linebuf);
 			ft_bzero(linebuf, sizeof(linebuf));
-			j = -3;
+			j = 0;
 		}
-		j += 3;
 	}
 }

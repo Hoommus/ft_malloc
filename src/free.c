@@ -14,7 +14,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-bool			free_large_region(struct s_region *region)
+static inline bool		free_large_region(struct s_region *region)
 {
 	int		ret;
 	
@@ -26,19 +26,22 @@ bool			free_large_region(struct s_region *region)
 	return (!ret);
 }
 
-static bool		free_block(struct s_block *blk)
+static inline bool		free_block(struct s_zone *zone, size_t idx)
 {
+	struct s_block	*blk;
+
+	zone->table_size_age++;
+	blk = zone->block_table + idx;
+	zone->bytes_malloced -= blk->size;
 	blk->pointer = 0;
 	blk->size = 0;
 	return (true);
 }
 
-// TODO: add table_size_age alterations
-bool 			free_ptr(void *pointer)
+bool 					free_ptr(void *pointer)
 {
 	struct s_zone	*zone;
 	size_t			i;
-	void 			*cmp;
 
 	zone = NULL;
 	i = -1;
@@ -55,23 +58,12 @@ bool 			free_ptr(void *pointer)
 		}
 	i = 0;
 	while (zone && ++i < zone->table_size)
-	{
-		if (zone->block_table[i].pointer != 0)
-		{
-			ft_putstr("  trying to free ");
-			print_hex_nbr((uint64_t)pointer);
-			ft_putstr(" against ");
-			print_hex_nbr(zone->block_table[i].pointer);
-			ft_putendl("");
-		}
-		cmp = (void *)zone->block_table[i].pointer;
-		if (cmp == pointer)
-			return (free_block(zone->block_table + i));
-	}
+		if ((void *)zone->block_table[i].pointer == pointer)
+			return (free_block(zone, i));
 	return (false);
 }
 
-void	free(void *ptr)
+void					free(void *ptr)
 {
 	if (!ptr)
 		return ;
