@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 17:47:34 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 18:12:09 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static void				insert_block(struct s_zone *zone, size_t pivot)
 {
 	struct s_block	*next;
 	struct s_block	*blk;
-	const size_t	cmp = zone->type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX;
+	const size_t	cmp = zone->type == BLK_TINY ? BLK_MIN_SIZE : BLK_TINY_MAX;
 	size_t			gap;
 
 	next = zone->block_table + pivot + 1;
@@ -49,7 +49,7 @@ static void				fix_table_size(struct s_zone *zone)
 	size_t			new_table_size;
 	size_t			free_space;
 
-	if (zone->table_bound < 8)
+	if (zone->table_size_age < 8)
 		return ;
 	ft_putstr("+++++ fixing table size from ");
 	ft_putnbr(zone->table_size);
@@ -57,7 +57,7 @@ static void				fix_table_size(struct s_zone *zone)
 	if (zone->type == BLK_TINY)
 	{
 		min_table_size = free_space / BLK_TINY_MAX;
-		new_table_size = free_space / BLOCK_MIN_SIZE;
+		new_table_size = free_space / BLK_MIN_SIZE;
 	}
 	else
 	{

@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 17:41:44 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 19:25:09 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,13 +33,13 @@
 #  define ABS(x) ((x) < 0 ? -(x) : (x))
 # endif
 
-# define ALIGN_TO_ARCH(x)       ((x) + ABS(ALIGNMENT - x) % ALIGNMENT)
+# define ALIGN_TO_ARCH(x) (align_to((x), sizeof(size_t)))
 
 # define BLK_TINY_MAX 128
 # define BLK_SMALL_MAX ((1 << 16) - 1)
 # define BLK_LARGE_MAX (128 * 1024 * 1024)
 
-# define BLOCK_MIN_SIZE 16
+# define BLK_MIN_SIZE 24
 
 # define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 256)
 # define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
@@ -132,7 +132,7 @@ bool								in_region_bounds(struct s_region *region, void *ptr);
 void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
 
-size_t								align_to_page(size_t size, size_t pagesize);
+size_t								align_to(size_t size, size_t to_what);
 void								print_hex_dump(void *ptr, size_t len, bool print_address);
 void								print_hex_nbr(uint64_t n);
 struct s_region						*region_create(struct s_region *region, void *start, size_t size);

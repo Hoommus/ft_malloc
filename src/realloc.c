@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 11:58:05 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 17:57:47 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 17:59:44 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void __attribute__((visibility("default")))			*realloc(void *ptr, size_t new_siz
 	if (!ptr)
 		p = malloc(new_size);
 	else if (new_size == 0)
-		p = malloc(BLOCK_MIN_SIZE);
+		p = malloc(BLK_MIN_SIZE);
 	else
 	{
 		old_size = get_block_size(ptr);
@@ -75,7 +75,6 @@ void __attribute__((visibility("default")))			*realloc(void *ptr, size_t new_siz
 	ft_putstr("\e[0m");
 	return (p);
 	// TODO: if new size > pagesize, don't try to realloc
-	//       if new size >> this block size, try to realloc to bigger block
 	//       if new size > 2^48, fail
 	//       if ptr does not have enough space to the left to store block metadata, consider it a invalid address
 	//       if ptr is not a valid block, fail

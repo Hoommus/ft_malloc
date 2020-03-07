@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:15 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 13:20:04 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 15:24:35 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ struct s_zone			*region_create_zone(struct s_region *region,
 	if (type <= 0 || type >= BLK_LARGE ||
 		!(zone = find_space_for_zone(region, size)))
 		return (NULL);
-	table_size = size / (type == BLK_TINY ? BLOCK_MIN_SIZE : BLK_TINY_MAX);
+	table_size = size / (type == BLK_TINY ? BLK_MIN_SIZE : BLK_TINY_MAX);
 	ft_putstr("  requested table size: ");
 	ft_putnbr(table_size);
 	ft_putendl("");

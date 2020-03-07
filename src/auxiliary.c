@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 16:11:30 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 16:11:36 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 20:04:02 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ bool									is_ptr_valid(void *ptr)
 	return (true);
 }
 
-size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize)
+size_t __attribute__((always_inline))	align_to(size_t size, size_t to_what)
 {
-	return (size + ABS((pagesize - size) % pagesize));
+	return (size + ABS((to_what - size) % to_what));
 }
 
 void									print_hex_nbr(uint64_t n)
@@ -61,7 +61,7 @@ void									print_hex_dump(void *ptr, size_t len, bool print_address)
 		linebuf[j++] = alphabet[(((uint8_t *)ptr)[i] >> 4) & 0xf];
 		linebuf[j++] = alphabet[((uint8_t *)ptr)[i] & 0xf];
 		linebuf[j++] = ' ';
-		if (i && i % 32 == 0)
+		if (i && (i % 32 == 0 || i == len - 1))
 		{
 			linebuf[sizeof(linebuf) - 1] = 0;
 			if (print_address)
@@ -72,5 +72,4 @@ void									print_hex_dump(void *ptr, size_t len, bool print_address)
 			j = 0;
 		}
 	}
-	ft_putendl(linebuf);
 }

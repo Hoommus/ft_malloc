@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:25:04 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 15:45:55 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 19:27:40 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 
-pthread_mutex_t									g_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+pthread_mutex_t									g_mutex = PTHREAD_MUTEX_INITIALIZER;
 struct s_storage *restrict						g_storage = NULL;
 
 __attribute__((destructor,used)) static void	malloc_destroy(void)
@@ -23,6 +23,8 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 	struct s_zone		*zones;
 	size_t				i;
 
+	if (!g_storage)
+		return ;
 	i = 0;
 	ft_putstr("destroyin\n");
 	pthread_mutex_lock(&g_mutex);
@@ -50,7 +52,9 @@ void __attribute__((visibility("default")))		*malloc(size_t size)
 {
 	if (!g_storage)
 		malloc_init();
-	ft_putstr("\ninside our malloc\n");
+	ft_putstr("\ninside our malloc\n Requesting: ");
+	ft_putnbr(size);
+	ft_putendl("");
 	if (size == 0)
 		return (NULL);
 	if (size > BLK_SMALL_MAX)
