@@ -14,9 +14,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-bool			free_large_region(struct s_region *region)
+static inline bool		free_large_region(struct s_region *region)
 {
 	int		ret;
+	
 	assert(!region->zones);
 	assert(region->large);
 	assert(!region->large->next);
@@ -25,7 +26,19 @@ bool			free_large_region(struct s_region *region)
 	return (!ret);
 }
 
-bool 			free_block(void *pointer)
+static inline bool		free_block(struct s_zone *zone, size_t idx)
+{
+	struct s_block	*blk;
+
+	zone->table_size_age++;
+	blk = zone->block_table + idx;
+	zone->bytes_malloced -= blk->size;
+	blk->pointer = 0;
+	blk->size = 0;
+	return (true);
+}
+
+bool 					free_ptr(void *pointer)
 {
 	struct s_zone	*zone;
 	size_t			i;
@@ -43,23 +56,21 @@ bool 			free_block(void *pointer)
 			else
 				return (free_large_region(g_storage->regions + i));
 		}
-	i = -1;
+	i = 0;
 	while (zone && ++i < zone->table_size)
 		if ((void *)zone->block_table[i].pointer == pointer)
-			return (zone->block_table[i].is_free = true);
+			return (free_block(zone, i));
 	return (false);
 }
 
-void	free(void *ptr)
+void					free(void *ptr)
 {
 	if (!ptr)
 		return ;
-	if (!free_block(ptr))
+	if (!free_ptr(ptr))
 	{
-		//printf("**** pointer being freed was not allocated: %p\n", ptr);
-		write(1, "hello from free \n", 16);
-		ft_putnbr((int)ptr);
+		ft_putstr(" - error from free\n");
+		print_hex_nbr((uint64_t)ptr);
 		ft_putchar('\n');
-		abort();
 	}
 }

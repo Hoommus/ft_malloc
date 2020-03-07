@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+         #
+#    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/07/12 14:31:34 by vtarasiu          #+#    #+#              #
-#    Updated: 2020/02/22 18:05:04 by vtarasiu         ###   ########.fr        #
+#    Updated: 2019/12/25 17:11:06 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,9 +22,7 @@ FLAGS = -g \
         -Wall \
         -Wextra \
         -Werror \
-        -Wno-unknown-pragmas \
-        -fsanitize=address
-#        -fvisibility=hidden
+        -Wno-unknown-pragmas
 #                    -lpthread
 
 SRC_DIR = ./src/
@@ -41,7 +39,6 @@ MALLOC_SRC = realloc.c \
              free.c \
              malloc.c \
              allocator_reverse.c \
-             allocator_straight.c \
              init.c
 
 HEADERS = -I includes/ -I $(LIB_DIR)
@@ -57,7 +54,7 @@ $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
 	fi
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	$(CC) $(FLAGS) -fPIC $(HEADERS) -o $@ -c $< ;
+	$(CC) -fPIC $(FLAGS) $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)
