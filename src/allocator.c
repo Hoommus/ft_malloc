@@ -33,6 +33,19 @@ void				*alloc_largie(size_t size)
 	return (region->large);
 }
 
+static void 		*mmap_more_and_alloc(size_t size, enum e_size_type type)
+{
+	struct s_region	*new_region;
+	size_t 			region_size;
+
+	region_size = align_to_page(sizeof(struct s_region) + (type == BLK_TINY 
+			? REGION_TINIES_SIZE : REGION_SMALLIES_SIZE), g_storage->pagesize);
+	new_region = mmap(NULL, region_size, 
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0); 
+	region_create(new_region, new_region, region_size);
+	return (alloc(size, type));
+}
+
 #include <sys/types.h>
 #include <signal.h>
 void				*alloc(size_t size, enum e_size_type type)
@@ -49,9 +62,7 @@ void				*alloc(size_t size, enum e_size_type type)
 	else
 		aligned = size + BLK_TINY_MAX >= BLK_SMALL_MAX ? BLK_SMALL_MAX : ALIGN_TO_ARCH(size);
 	i = 0;
-	write(1, "Locking mutex\n", 14);
 	pthread_mutex_lock(&g_mutex);
-	ft_putstr("  Inside alloc 2\n");
 	region = g_storage->regions;
 	while (i < g_storage->regions_quantity && !blk)
 	{
@@ -68,9 +79,8 @@ void				*alloc(size_t size, enum e_size_type type)
 			zone = zone->next;
 		}
 	}
-	ft_putstr("allocated something ");
-	print_hex_nbr((uint64_t)blk);
-	write(1, "\n", 1);
+	if (!blk)
+		blk = mmap_more_and_alloc(size, type);
 	pthread_mutex_unlock(&g_mutex);
 	return (blk);
 }

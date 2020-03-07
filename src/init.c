@@ -13,7 +13,7 @@
 #include "ft_malloc_private.h"
 #include <stdio.h>
 
-struct s_region									*region_create(struct s_region *region, void *start, size_t size)
+struct s_region								*region_create(struct s_region *region, void *start, size_t size)
 {
 	ft_bzero(region, sizeof(struct s_region));
 	region->start = start;
@@ -21,7 +21,7 @@ struct s_region									*region_create(struct s_region *region, void *start, siz
 	return (start);
 }
 
-static void										read_env(void)
+static void									read_env(void)
 {
 	char	*var;
 
@@ -30,7 +30,7 @@ static void										read_env(void)
 		g_storage->threshold = ft_atoi_base(var, 10);
 }
 
-static void 									regions_init(size_t pagesize, size_t first_region_size)
+static void 								regions_init(size_t pagesize, size_t first_region_size)
 {
 	ft_bzero(g_storage->regions, pagesize * 2 - sizeof(*g_storage));
 	g_storage->regions[0].start = mmap(NULL, first_region_size,
@@ -48,7 +48,7 @@ static void 									regions_init(size_t pagesize, size_t first_region_size)
 					   align_to_page(REGION_SMALLIES_SIZE, pagesize));
 }
 
-__attribute__((constructor,used)) static void	malloc_init(void)
+__attribute__((constructor)) static void	malloc_init(void)
 {
 	int					pagesize;
 	size_t				first_region_size;

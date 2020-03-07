@@ -69,7 +69,6 @@ struct								s_zone
 {
 	uint64_t			zone_magic;
 	enum e_size_type	type:3;
-	bool				is_full:1;
 	bool				is_free:1;
 	size_t				table_size_age:5;
 	size_t				bytes_malloced:48;
@@ -87,7 +86,7 @@ struct								s_region
 	void			*start;
 	bool			is_free:1;
 	size_t			bytes_malloced:48;
-	size_t			bytes_mapped:48;
+	size_t			bytes_mapped;
 	struct s_zone	*zones;
 	struct s_zone	*large;
 } __attribute__((aligned(8))); // 40 bytes
@@ -135,5 +134,6 @@ void								*get_block_reverse(struct s_zone *zone, size_t size);
 size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
 void									print_hex_dump(void *ptr, size_t len, bool print_address);
 void									print_hex_nbr(uint64_t n);
+struct s_region							*region_create(struct s_region *region, void *start, size_t size);
 
 #endif //FT_MALLOC_PRIVATE_H

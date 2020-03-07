@@ -68,29 +68,34 @@ int 							memcmp_pattern(const void *p, const void *pattern,
 
 void				fix_table_size(struct s_zone *zone)
 {
-	size_t			table_size;
 	size_t			min_table_size;
-	const size_t	table_size_bytes = zone->table_size * sizeof(struct s_block);
+	size_t 			table_size;
+	size_t			free_space;
 	struct s_block	pattern;
 
+	if (zone->first_free_block_index < 8)
+		return ;
 	ft_bzero(&pattern, sizeof(pattern));
 	ft_putstr("+++++ fixing table size from ");
 	ft_putnbr(zone->table_size);
+	free_space = zone->block_table[zone->first_free_block_index - 1].pointer - 
+			(size_t)zone->block_table;
 	if (zone->type == BLK_TINY)
 	{
-		table_size = table_size_bytes / BLOCK_MIN_SIZE;
-		min_table_size = table_size_bytes / BLK_TINY_MAX;
+		min_table_size = free_space / BLK_TINY_MAX;
+		table_size = free_space / BLOCK_MIN_SIZE;
 	}
 	else
 	{
-		table_size = table_size_bytes / BLK_TINY_MAX;	
-		min_table_size = table_size_bytes / BLK_SMALL_MAX;
+		min_table_size = free_space / BLK_SMALL_MAX;
+		table_size = free_space / BLK_TINY_MAX;
 	}
+	table_size += zone->first_free_block_index;
 	if (table_size < min_table_size)
 		return ;
 	if (table_size < zone->table_size 
 		&& !memcmp_pattern(zone->block_table + table_size, &pattern, 
-			sizeof(pattern), sizeof(pattern) * (zone->table_size - table_size - 1)))
+		sizeof(pattern), sizeof(pattern) * (zone->table_size - table_size - 1)))
 		zone->table_size = table_size;
 	else if (table_size > zone->table_size)
 		zone->table_size = table_size; // TODO: check for any allocated blocks in that memory part
