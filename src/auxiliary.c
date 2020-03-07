@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   auxiliary.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 16:11:30 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/01/25 14:13:14 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 16:11:36 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc_private.h"
 
-bool									ptr_seems_valid(void *ptr)
+bool									is_ptr_valid(void *ptr)
 {
 #if __POINTER_WIDTH__ == 64
 	if (((size_t)ptr) & ADDRESS_SPACE_HEADER)
@@ -33,7 +33,7 @@ void									print_hex_nbr(uint64_t n)
 	static const char	alphabet[17] = "0123456789abcdef";
 	char				line[2 + 16 + 1];
 	size_t				i;
-	
+
 	ft_bzero(line, sizeof(line));
 	line[0] = '0';
 	line[1] = 'x';
@@ -72,4 +72,5 @@ void									print_hex_dump(void *ptr, size_t len, bool print_address)
 			j = 0;
 		}
 	}
+	ft_putendl(linebuf);
 }

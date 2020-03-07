@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   malloc.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 15:25:04 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/02/22 17:34:24 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 15:45:55 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 
-pthread_mutex_t									g_mutex;
+pthread_mutex_t									g_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 struct s_storage *restrict						g_storage = NULL;
 
 __attribute__((destructor,used)) static void	malloc_destroy(void)
@@ -24,7 +24,7 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 	size_t				i;
 
 	i = 0;
-	write(1, "destroyin\n", 11);
+	ft_putstr("destroyin\n");
 	pthread_mutex_lock(&g_mutex);
 	array = g_storage->regions;
 	while (i < g_storage->regions_quantity)
@@ -40,24 +40,23 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 		i++;
 	}
 	munmap(g_storage->map_start, g_storage->pagesize);
+	g_storage = NULL;
 	pthread_mutex_unlock(&g_mutex);
 	pthread_mutex_destroy(&g_mutex);
 	ft_putstr("destroyed\n");
 }
 
-void											*malloc(size_t size)
+void __attribute__((visibility("default")))		*malloc(size_t size)
 {
 	if (!g_storage)
 		malloc_init();
-	ft_putstr("inside our malloc\n");
+	ft_putstr("\ninside our malloc\n");
 	if (size == 0)
 		return (NULL);
 	if (size > BLK_SMALL_MAX)
 		return (alloc_largie(size));
 	if (size > BLK_TINY_MAX)
 		return (alloc(size, BLK_SMALL));
-	//printf("mapped: %zu\n", g_storage->total_mapped);
-	//printf("total allocated: %zu\n", g_storage->total_allocated);
 	return (alloc(size, BLK_TINY));
 }
 

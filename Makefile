@@ -6,7 +6,7 @@
 #    By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/07/12 14:31:34 by vtarasiu          #+#    #+#              #
-#    Updated: 2019/12/25 17:11:06 by vtarasiu         ###   ########.fr        #
+#    Updated: 2020/03/07 15:36:08 by vtarasiu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,13 +48,13 @@ OBJ = $(addprefix $(OBJ_DIR), $(MALLOC_SRC:.c=.o))
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ) $(LIB_NAME)
-	$(CC) $(FLAGS) --shared -o $(NAME) $(OBJ) $(HEADERS) $(LIB_DIR)/$(LIB_NAME)
-	@if ! [ -f libft_malloc.so ] ; then \
+	$(CC) -shared -flat_namespace -o $(NAME) $(OBJ) $(LIB_DIR)/$(LIB_NAME) $(HEADERS)
+	@ if ! [ -f libft_malloc.so ] ; then \
 	    /bin/ln -s $(NAME) libft_malloc.so ; \
 	fi
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
-	$(CC) -fPIC $(FLAGS) $(HEADERS) -o $@ -c $< ;
+$(OBJ_DIR)%.o: $(SRC_DIR)%.c includes/ft_malloc_private.h | $(OBJ_DIR)
+	$(CC) $(FLAGS) -fPIC -fvisibility=hidden $(HEADERS) -o $@ -c $< ;
 
 $(LIB_NAME):
 	make -C $(LIB_DIR)

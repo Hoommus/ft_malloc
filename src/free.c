@@ -38,7 +38,7 @@ static inline bool		free_block(struct s_zone *zone, size_t idx)
 	return (true);
 }
 
-bool 					free_ptr(void *pointer)
+bool 					free_ptr(void *ptr)
 {
 	struct s_zone	*zone;
 	size_t			i;
@@ -46,7 +46,7 @@ bool 					free_ptr(void *pointer)
 	zone = NULL;
 	i = -1;
 	while (++i < g_storage->regions_quantity)
-		if (in_region_bounds(g_storage->regions + i, pointer))
+		if (in_region_bounds(g_storage->regions + i, ptr))
 		{
 			if (!g_storage->regions[i].large)
 			{
@@ -58,18 +58,18 @@ bool 					free_ptr(void *pointer)
 		}
 	i = 0;
 	while (zone && ++i < zone->table_size)
-		if ((void *)zone->block_table[i].pointer == pointer)
+		if ((void *)zone->block_table[i].pointer == ptr)
 			return (free_block(zone, i));
 	return (false);
 }
 
-void					free(void *ptr)
+void __attribute__((visibility("default")))					free(void *ptr)
 {
 	if (!ptr)
 		return ;
 	if (!free_ptr(ptr))
 	{
-		ft_putstr(" - error from free\n");
+		ft_putstr(" - error from free: ");
 		print_hex_nbr((uint64_t)ptr);
 		ft_putchar('\n');
 	}

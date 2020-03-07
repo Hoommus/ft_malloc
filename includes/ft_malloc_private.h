@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_malloc_private.h                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vtarasiu <vtarasiu@student.unit.ua>        +#+  +:+       +#+        */
+/*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/02/08 12:19:45 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 17:41:44 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,10 @@
 #  define ABS(x) ((x) < 0 ? -(x) : (x))
 # endif
 
-# define ALIGN_TO_PAGE align_to_page
-# define ALIGN_TO_ARCH(x)       ((x) + ABS((ALIGNMENT - x) % ALIGNMENT))
+# define ALIGN_TO_ARCH(x)       ((x) + ABS(ALIGNMENT - x) % ALIGNMENT)
 
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX ((1 << 17) - 1)
+# define BLK_SMALL_MAX ((1 << 16) - 1)
 # define BLK_LARGE_MAX (128 * 1024 * 1024)
 
 # define BLOCK_MIN_SIZE 16
@@ -60,9 +59,9 @@ enum								e_size_type
 
 struct								s_block
 {
-	uint16_t			size:16;
-	size_t				pointer : 48; // TODO: 3 bits left
-} __attribute__((packed,aligned(8)));
+	uint16_t			size;
+	size_t				pointer:48;
+} __attribute__((packed));
 
 // Zones contain blocks that will be returned via a malloc() call
 struct								s_zone
@@ -72,12 +71,13 @@ struct								s_zone
 	bool				is_free:1;
 	size_t				table_size_age:5;
 	size_t				bytes_malloced:48;
+	size_t				bytes_free;
 	size_t				zone_size;
 	size_t				table_size;
 	size_t				table_bound;
 	size_t				first_free_block_index;
 	struct s_zone		*next;
-	struct s_block		block_table[]; // TODO: restrict size to page boundary
+	struct s_block		block_table[];
 } __attribute__((aligned(8)));
 
 // Regions contain continuous memory that was acquired from every mmap() call
@@ -85,7 +85,6 @@ struct								s_region
 {
 	void			*start;
 	bool			is_free:1;
-	size_t			bytes_malloced:48;
 	size_t			bytes_mapped;
 	struct s_zone	*zones;
 	struct s_zone	*large;
@@ -121,7 +120,9 @@ struct								s_storage
 extern pthread_mutex_t				g_mutex;
 extern struct s_storage *restrict	g_storage;
 
-bool								ptr_seems_valid(void *ptr);
+void								malloc_init(void);
+
+bool								is_ptr_valid(void *ptr);
 void								*alloc(size_t size, enum e_size_type type);
 void								*alloc_largie(size_t size);
 struct s_zone						*region_create_zone(struct s_region *region,
@@ -131,9 +132,9 @@ bool								in_region_bounds(struct s_region *region, void *ptr);
 void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
 
-size_t __attribute__((always_inline))	align_to_page(size_t size, size_t pagesize);
-void									print_hex_dump(void *ptr, size_t len, bool print_address);
-void									print_hex_nbr(uint64_t n);
-struct s_region							*region_create(struct s_region *region, void *start, size_t size);
+size_t								align_to_page(size_t size, size_t pagesize);
+void								print_hex_dump(void *ptr, size_t len, bool print_address);
+void								print_hex_nbr(uint64_t n);
+struct s_region						*region_create(struct s_region *region, void *start, size_t size);
 
 #endif //FT_MALLOC_PRIVATE_H

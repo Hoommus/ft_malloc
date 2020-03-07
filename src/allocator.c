@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 17:34:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/25 15:48:07 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/07 13:35:20 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,11 @@ void				*alloc_largie(size_t size)
 	size_t				aligned;
 	struct s_region		*region;
 
-	aligned = ALIGN_TO_PAGE(ALIGN_TO_ARCH(sizeof(struct s_region)) + size, g_storage->pagesize);
+	aligned = align_to_page(ALIGN_TO_ARCH(sizeof(struct s_region)) + size, g_storage->pagesize);
 	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-	ft_bzero(region, sizeof(region));
+	ft_bzero(region, sizeof(*region));
 	region->start = region;
 	region->bytes_mapped = aligned;
-	region->bytes_malloced = size;
-//	region->is_full = aligned == size;
 	region->large = (struct s_zone *)region + ALIGN_TO_ARCH(sizeof(struct s_region));
 	pthread_mutex_lock(&g_mutex);
 	g_storage->regions_quantity++;
@@ -75,7 +73,7 @@ void				*alloc(size_t size, enum e_size_type type)
 			ft_putendl("");
 			if (zone->zone_magic != ZONE_MAGIC)
 				kill(0, 1);
-			if (!zone->is_full && (blk = get_block_reverse(zone, aligned)))
+			if (zone->bytes_free && (blk = get_block_reverse(zone, aligned)))
 				break ;
 			zone = zone->next;
 		}
@@ -83,6 +81,9 @@ void				*alloc(size_t size, enum e_size_type type)
 	if (!blk)
 		blk = mmap_more_and_alloc(size, type);
 	pthread_mutex_unlock(&g_mutex);
+	ft_putstr("allocating ");
+	print_hex_nbr((uint64_t)blk);
+	ft_putendl("");
 	assert((size_t)blk % 8 == 0);
 	return (blk);
 }
