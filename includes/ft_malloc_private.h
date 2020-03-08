@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:15:51 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:20:33 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,15 @@
 
 # define BLK_MIN_SIZE 32
 
-# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 256)
-# define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)
+# define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 128)
+# define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 100)
 
 # define PAGE_ADDRESS_MASK  0xFFFU // 12 bits of address space per page
 # define PAGE_NUMBER_MASK (~0x0ULL) ^ (PAGE_ADDRESS_MASK)
 # define ADDRESS_SPACE_HEADER 0xFFFF000000000000ULL
 
 # define ZONE_MAGIC 0xBADBABE0DEADCAFE
+# define REGION_MAGIC 0xBABEBAD0CAFEDEAD
 
 enum								e_size_type
 {
@@ -83,6 +84,7 @@ struct								s_zone
 // Regions contain continuous memory that was acquired from every mmap() call
 struct								s_region
 {
+	uint64_t		magic;
 	void			*start;
 	bool			is_free:1;
 	size_t			bytes_mapped;
@@ -95,7 +97,6 @@ struct								s_stats
 	struct rlimit	limits;
 	size_t			total_allocated;
 	size_t			total_mapped;
-	int				dummy;
 };
 
 enum								e_flags
@@ -110,9 +111,7 @@ struct								s_storage
 	size_t			total_allocated;
 	size_t			pagesize;
 	size_t			threshold;
-	size_t			flags;
 	struct s_stats	stats;
-	void			*(*get_block)(struct s_zone *, size_t);
 	size_t			regions_quantity;
 	struct s_region	regions[];
 } __attribute__((aligned(8)));
@@ -137,4 +136,4 @@ void								print_hex_dump(void *ptr, size_t len, bool print_address);
 void								print_hex_nbr(uint64_t n);
 struct s_region						*region_create(struct s_region *region, void *start, size_t size);
 
-#endif //FT_MALLOC_PRIVATE_H
+#endif

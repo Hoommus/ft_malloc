@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:55:23 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:09:02 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:22:29 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ static void			read_env(void)
 {
 	char	*var;
 
-	g_storage->get_block = get_block_reverse;
 	if ((var = getenv("FTMALLOC_THRESHOLD")) && ft_atoi(var) > 8)
 		g_storage->threshold = ft_atoi_base(var, 10);
 }

@@ -6,13 +6,13 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 11:58:05 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 17:59:44 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 16:14:53 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_malloc_private.h"
 
-size_t 			get_block_size(void *ptr)
+static struct s_zone	*get_block(void *ptr, size_t *idx)
 {
 	struct s_zone	*zone;
 	size_t			i;
@@ -30,52 +30,68 @@ size_t 			get_block_size(void *ptr)
 				break ;
 			}
 			else
-			{
-				return (g_storage->regions[i].bytes_mapped - sizeof(struct s_region));
-			}
+				return ((struct s_zone *)(g_storage->regions + i));
 		}
-	i = 0;
-	while (zone && ++i < zone->table_size)
-		if ((void *)zone->block_table[i].pointer == ptr)
-			return (zone->block_table[i].size);
-	return (false);
+	*idx = 0;
+	while (zone && ++(*idx) < zone->table_size)
+		if ((void *)zone->block_table[*idx].pointer == ptr)
+			return (zone);
+	return (NULL);
 
 }
 
-void __attribute__((visibility("default")))			*realloc(void *ptr, size_t new_size)
+void					*resize_ptr(struct s_zone *zone, size_t block_idx,
+									void *ptr, size_t new_size)
 {
-	void	*p;
-	size_t	old_size;
+	const struct s_block		*block = zone->block_table + block_idx;
+	const struct s_block		*next = zone->block_table + block_idx + 1;
+	void 						*p;
+
+	if (block->size >= new_size)
+		return (ptr);
+	else if ((next->pointer && block->pointer + new_size < next->pointer)
+		|| (block_idx == zone->table_bound))
+	{
+		((struct s_block *)block)->size = new_size;
+		return (ptr);
+	}
+	else
+	{
+		p = ft_memcpy(malloc(new_size), (void *)block->pointer, block->size);
+		free(ptr);
+		return (p);
+	}
+}
+
+void __attribute__((visibility("default")))
+						*realloc(void *ptr, size_t new_size)
+{
+	void			*p;
+	size_t			idx;
+	struct s_zone	*zone;
 
 	ft_putstr("\e[36;1m ***** realloc of ");
 	print_hex_nbr((uint64_t)ptr);
 	ft_putstr(" with new size ");
 	ft_putnbr(new_size);
-	ft_putendl("");
+	ft_putendl("\e[0m");
 	if (!is_ptr_valid(ptr))
-	{
-		ft_putstr("      \e[32;1m** pointer is not valid\e[0m\n");
-		return NULL;
-	}
-	if (!ptr)
-		p = malloc(new_size);
+		return (NULL);
+	else if (!ptr)
+		return (malloc(new_size));
 	else if (new_size == 0)
-		p = malloc(BLK_MIN_SIZE);
-	else
+		return (malloc(align_to(BLK_MIN_SIZE, 32)));
+	zone = (struct s_zone *)get_block(ptr, &idx);
+	if (!zone)
+		return (NULL);
+	if (zone->zone_magic == REGION_MAGIC)
 	{
-		old_size = get_block_size(ptr);
-		ft_putstr("old size is: ");
-		ft_putnbr(old_size);
-		ft_putstr(" allocating new pointer ");
-		if (new_size < old_size)
-			old_size = new_size;
-		p = malloc(new_size);
-		ft_memcpy(p, ptr, old_size);
+		if (((struct s_region *)zone)->bytes_mapped >= new_size)
+			return (ptr);
+		p = ft_memcpy(alloc_largie(new_size), ptr, ((struct s_region *)zone)->bytes_mapped);
+		free(ptr);
+		return (p);
 	}
-	ft_putstr("\e[0m");
-	return (p);
-	// TODO: if new size > pagesize, don't try to realloc
-	//       if new size > 2^48, fail
-	//       if ptr does not have enough space to the left to store block metadata, consider it a invalid address
-	//       if ptr is not a valid block, fail
+	else
+		return (resize_ptr(zone, idx, ptr, new_size));
 }
