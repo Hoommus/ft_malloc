@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 19:25:09 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:15:51 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,10 @@
 # define ALIGN_TO_ARCH(x) (align_to((x), sizeof(size_t)))
 
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX ((1 << 16) - 1)
+# define BLK_SMALL_MAX ((1 << 14) - 1)
 # define BLK_LARGE_MAX (128 * 1024 * 1024)
 
-# define BLK_MIN_SIZE 24
+# define BLK_MIN_SIZE 32
 
 # define REGION_TINIES_SIZE ((BLK_TINY_MAX) * 256)
 # define REGION_SMALLIES_SIZE (((size_t)BLK_SMALL_MAX) * 128)

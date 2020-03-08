@@ -14,7 +14,7 @@
 
 #include <stdio.h>
 
-pthread_mutex_t									g_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t									g_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 struct s_storage *restrict						g_storage = NULL;
 
 __attribute__((destructor,used)) static void	malloc_destroy(void)

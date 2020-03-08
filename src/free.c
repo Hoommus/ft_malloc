@@ -20,7 +20,6 @@ static inline bool		free_large_region(struct s_region *region)
 	
 	assert(!region->zones);
 	assert(region->large);
-	assert(!region->large->next);
 	ret = munmap(region->start, region->bytes_mapped);
 	ft_bzero(region, sizeof(struct s_region));
 	return (!ret);

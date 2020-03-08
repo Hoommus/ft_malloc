@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 17:34:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 20:05:33 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:11:49 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,17 @@ static void 		*mmap_more_and_alloc(size_t size, enum e_size_type type)
 	ft_putstr("allocationg more\n");
 	region_size = align_to(sizeof(struct s_region) + (type == BLK_TINY
 													  ? REGION_TINIES_SIZE : REGION_SMALLIES_SIZE), g_storage->pagesize);
-	new_region = mmap(NULL, region_size, 
-		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0); 
-	region_create(new_region, new_region, region_size);
+	new_region = g_storage->regions + g_storage->regions_quantity;
+	ft_bzero(new_region, sizeof(*new_region));
+	new_region->start = mmap(NULL, region_size,
+		PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	region_create(new_region, new_region->start, region_size);
+	region_create_zone(new_region, type, region_size);
+	g_storage->regions_quantity++;
+	ft_putstr("allocationg more2\n");
 	return (alloc(size, type));
 }
 
-#include <signal.h>
 void				*alloc(size_t size, enum e_size_type type)
 {
 	size_t			aligned;
@@ -60,7 +64,6 @@ void				*alloc(size_t size, enum e_size_type type)
 		aligned = size < BLK_MIN_SIZE ? BLK_MIN_SIZE : align_to(size, 8);
 	else
 		aligned = size + BLK_TINY_MAX >= BLK_SMALL_MAX ? BLK_SMALL_MAX : align_to(size, 8);
-	aligned += 8;
 	i = 0;
 	pthread_mutex_lock(&g_mutex);
 	region = g_storage->regions;
