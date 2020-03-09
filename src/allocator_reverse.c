@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 16:50:20 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:28:31 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,14 +35,6 @@ static void				insert_block(struct s_zone *zone, size_t pivot)
 		blk->size = blk->size + gap;
 }
 
-int						memcmp_byte(const void *p, uint8_t byte, size_t len)
-{
-	while (len--)
-		if (*((uint8_t *)p) != byte)
-			return (*(uint8_t *)p - byte);
-	return (0);
-}
-
 static void				fix_table_size(struct s_zone *zone)
 {
 	size_t			min_table_size;
@@ -65,16 +57,18 @@ void				place_bounds(struct s_zone *zone, size_t pivot)
 {
 	const struct s_block	*table = zone->block_table;
 	const size_t			size = zone->table_size;
+	size_t					i;
 
+	if (zone->table_size_age % 2 != 0)
+		return ;
 	while (pivot < size && table[pivot].pointer != 0)
 		pivot++;
 	zone->first_free_block_index = pivot;
-	while (pivot < size && table[pivot].pointer != 0)
-		pivot++;
-	zone->table_bound = pivot;
-	zone->bytes_free = zone->block_table[zone->table_bound - 1].pointer -
-					   (size_t)zone->block_table + zone->table_bound;
-	ft_putendl("hello");
+	i = size - 1;
+	while (i > zone->first_free_block_index && table[i].pointer == 0)
+		i--;
+	zone->table_bound = i;
+	zone->bytes_free = table[i - 1].pointer - (size_t)(table + size);
 }
 
 static void				*block_allocate(struct s_zone *zone, size_t idx,
@@ -89,8 +83,8 @@ static void				*block_allocate(struct s_zone *zone, size_t idx,
 	blk = zone->block_table + idx;
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
-	place_bounds(zone, idx - 1);
 	insert_block(zone, idx);
+	place_bounds(zone, idx);
 	zone->bytes_malloced += blk->size;
 	if (zone->table_size_age < 8)
 		zone->table_size_age++;
@@ -105,12 +99,10 @@ void					*get_block_reverse(struct s_zone *zone, size_t size)
 	size_t			desired_ptr;
 	struct s_block	*table;
 
-	assert(size <= BLK_SMALL_MAX);
-	assert((zone->type == BLK_TINY || zone->type == BLK_SMALL));
 	if (size > BLK_SMALL_MAX || zone->zone_size - zone->bytes_malloced < size)
 		return (NULL);
 	table = zone->block_table;
-	i = zone->first_free_block_index - 1;
+	i = 0;
 	while (++i < zone->table_size)
 		if (table[i].pointer == 0)
 		{

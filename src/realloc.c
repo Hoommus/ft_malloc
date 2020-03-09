@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 11:58:05 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 16:14:53 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:08:08 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ static struct s_zone	*get_block(void *ptr, size_t *idx)
 		if ((void *)zone->block_table[*idx].pointer == ptr)
 			return (zone);
 	return (NULL);
-
 }
 
 void					*resize_ptr(struct s_zone *zone, size_t block_idx,
@@ -76,15 +75,19 @@ void __attribute__((visibility("default")))
 		return (malloc(new_size));
 	else if (new_size == 0)
 		return (malloc(align_to(BLK_MIN_SIZE, 32)));
+	pthread_mutex_lock(&g_mutex);
 	zone = (struct s_zone *)get_block(ptr, &idx);
+	pthread_mutex_unlock(&g_mutex);
 	if (!zone)
 		return (NULL);
 	if (zone->zone_magic == REGION_MAGIC)
 	{
 		if (((struct s_region *)zone)->bytes_mapped >= new_size)
 			return (ptr);
+		pthread_mutex_lock(&g_mutex);
 		p = ft_memcpy(alloc_largie(new_size), ptr,
 			((struct s_region *)zone)->bytes_mapped);
+		pthread_mutex_unlock(&g_mutex);
 		free(ptr);
 		return (p);
 	}

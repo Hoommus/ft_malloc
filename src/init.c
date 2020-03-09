@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:55:23 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:22:29 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:01:09 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 struct s_region		*region_create(struct s_region *region, void *start, size_t size)
 {
 	ft_bzero(region, sizeof(struct s_region));
+	region->magic = REGION_MAGIC;
 	region->start = start;
 	region->bytes_mapped = size;
 	return (start);
@@ -36,8 +37,8 @@ static void 		regions_init(size_t pagesize, size_t first_region_size)
 	region_create(g_storage->regions + 0, g_storage->regions[0].start,
 				  align_to(REGION_TINIES_SIZE, pagesize));
 	g_storage->regions[1].start = region_create(g_storage->regions + 1,
-												g_storage->regions[0].start + align_to(REGION_TINIES_SIZE, pagesize),
-												align_to(REGION_SMALLIES_SIZE, pagesize));
+		g_storage->regions[0].start + align_to(REGION_TINIES_SIZE, pagesize),
+		align_to(REGION_SMALLIES_SIZE, pagesize));
 	g_storage->regions_quantity = 2;	
 	region_create_zone(g_storage->regions + 0, BLK_TINY,
 					   align_to(REGION_TINIES_SIZE, pagesize));
@@ -56,10 +57,11 @@ void				malloc_init(void)
 	pagesize = getpagesize();
 	first_region_size = REGION_TINIES_SIZE + REGION_SMALLIES_SIZE;
 	getrlimit(RLIMIT_DATA, &g_storage->stats.limits);
-	g_storage = mmap(0, pagesize * 2, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON | MAP_PRIVATE, -1, 0);
+	g_storage = mmap(0, pagesize * 4, PROT_READ | PROT_WRITE,
+		MAP_SHARED | MAP_ANON | MAP_PRIVATE, -1, 0);
 	g_storage->map_start = g_storage;
 	g_storage->pagesize = pagesize;
-	g_storage->total_mapped = pagesize * 2 + first_region_size;
+	g_storage->total_mapped = pagesize * 4 + first_region_size;
 	g_storage->total_allocated = (void *)g_storage->regions - (void *)g_storage;
 	read_env();
 	regions_init(pagesize, first_region_size);

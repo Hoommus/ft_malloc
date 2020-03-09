@@ -12,23 +12,22 @@
 
 #include "ft_malloc_private.h"
 
-bool									is_ptr_valid(void *ptr)
+bool	is_ptr_valid(void *ptr)
 {
-#if __POINTER_WIDTH__ == 64
 	if (((size_t)ptr) & ADDRESS_SPACE_HEADER)
 		return (false);
-#endif
 	if ((size_t)ptr % 8 != 0)
 		return (false);
 	return (true);
 }
 
-size_t __attribute__((always_inline))	align_to(size_t size, size_t to_what)
+size_t __attribute__((always_inline))
+		align_to(size_t size, size_t to_what)
 {
 	return (size + ABS((to_what - size) % to_what));
 }
 
-void									print_hex_nbr(uint64_t n)
+void	print_hex_nbr(uint64_t n)
 {
 	static const char	alphabet[17] = "0123456789abcdef";
 	char				line[2 + 16 + 1];
@@ -46,7 +45,7 @@ void									print_hex_nbr(uint64_t n)
 	ft_putstr(line);
 }
 
-void									print_hex_dump(void *ptr, size_t len, bool print_address)
+void		print_hex_dump(void *ptr, size_t len, bool print_address)
 {
 	static const char	alphabet[17] = "0123456789abcdef";
 	char				linebuf[64 + 32 + 1];

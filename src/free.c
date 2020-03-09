@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:17:42 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 16:37:44 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,5 +76,7 @@ void __attribute__((visibility("default")))					free(void *ptr)
 {
 	if (!ptr)
 		return ;
+	pthread_mutex_lock(&g_mutex);
 	free_ptr(ptr);
+	pthread_mutex_unlock(&g_mutex);
 }

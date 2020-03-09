@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 17:34:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 15:31:54 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:05:30 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,9 @@ static void 		*mmap_more_and_alloc(size_t size, enum e_size_type type)
 	struct s_region	*new_region;
 	size_t 			region_size;
 
-	region_size = align_to(sizeof(struct s_region) + (type == BLK_TINY
-													  ? REGION_TINIES_SIZE : REGION_SMALLIES_SIZE), g_storage->pagesize);
+	region_size = align_to(sizeof(struct s_region) +
+		(type == BLK_TINY ? REGION_TINIES_SIZE : REGION_SMALLIES_SIZE),
+		g_storage->pagesize);
 	new_region = g_storage->regions + g_storage->regions_quantity;
 	ft_bzero(new_region, sizeof(*new_region));
 	new_region->start = mmap(NULL, region_size,
