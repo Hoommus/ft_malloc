@@ -53,9 +53,6 @@ void				malloc_init(void)
 	pthread_mutex_lock(&g_mutex);
 	if (g_storage)
 		return (void)pthread_mutex_unlock(&g_mutex);
-	ft_putstr("size of block: ");
-	ft_putnbr(sizeof(struct s_block));
-	ft_putendl("");
 	pagesize = getpagesize();
 	first_region_size = REGION_TINIES_SIZE + REGION_SMALLIES_SIZE;
 	getrlimit(RLIMIT_DATA, &g_storage->stats.limits);
@@ -65,8 +62,6 @@ void				malloc_init(void)
 	g_storage->total_mapped = pagesize * 2 + first_region_size;
 	g_storage->total_allocated = (void *)g_storage->regions - (void *)g_storage;
 	read_env();
-	write(1, "mapped some storage\n", 20);
 	regions_init(pagesize, first_region_size);
-	ft_putstr("regions initialized\n");
 	pthread_mutex_unlock(&g_mutex);
 }

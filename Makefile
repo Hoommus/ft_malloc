@@ -18,7 +18,7 @@ CC = clang
 
 NAME = libft_malloc_$(HOSTTYPE).so
 
-FLAGS = -g \
+FLAGS = -g -O2 \
         -Wall \
         -Wextra \
         -Werror \

@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 15:27:37 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 16:50:20 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ static void				fix_table_size(struct s_zone *zone)
 
 	if (zone->table_size_age < 8)
 		return ;
-	ft_putstr("+++++ fixing table size from ");
-	ft_putnbr(zone->table_size);
 	free_space = zone->bytes_free;
 	min_table_size = free_space / (zone->type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX);
 	new_table_size = free_space / (zone->type == BLK_TINY ? BLK_MIN_SIZE : BLK_TINY_MAX);
@@ -61,23 +59,13 @@ static void				fix_table_size(struct s_zone *zone)
 	if (new_table_size > zone->table_bound)
 		zone->table_size = new_table_size;
 	zone->table_size_age = 0;
-	ft_putstr(" to ");
-	ft_putnbr(zone->table_size);
-	ft_putendl("");
 }
 
-static void				place_bounds(struct s_zone *zone, size_t pivot)
+void				place_bounds(struct s_zone *zone, size_t pivot)
 {
 	const struct s_block	*table = zone->block_table;
 	const size_t			size = zone->table_size;
 
-	ft_putstr("==== old bounds: ");
-	ft_putnbr(pivot);
-	ft_putstr(" first free block: ");
-	ft_putnbr(zone->first_free_block_index);
-	ft_putstr(" table bound: ");
-	ft_putnbr(zone->table_bound);
-	ft_putendl("");
 	while (pivot < size && table[pivot].pointer != 0)
 		pivot++;
 	zone->first_free_block_index = pivot;
@@ -86,14 +74,7 @@ static void				place_bounds(struct s_zone *zone, size_t pivot)
 	zone->table_bound = pivot;
 	zone->bytes_free = zone->block_table[zone->table_bound - 1].pointer -
 					   (size_t)zone->block_table + zone->table_bound;
-	ft_putstr("==== new bounds: ");
-	ft_putstr(" first free block: ");
-	ft_putnbr(zone->first_free_block_index);
-	ft_putstr(" table bound: ");
-	ft_putnbr(zone->table_bound);
-	ft_putstr(" free bytes: ");
-	ft_putnbr(zone->bytes_free);
-	ft_putendl("");
+	ft_putendl("hello");
 }
 
 static void				*block_allocate(struct s_zone *zone, size_t idx,
@@ -108,18 +89,8 @@ static void				*block_allocate(struct s_zone *zone, size_t idx,
 	blk = zone->block_table + idx;
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
-	ft_putstr("allocating block ");
-	print_hex_nbr(blk->pointer);
-	ft_putstr(" with size ");
-	ft_putnbr(size);
-	ft_putendl("");
-	ft_memcpy((void *)blk->pointer, "hello from block_allocate", sizeof("hello from block_allocate"));
-	//print_hex_dump(zone->block_table, 256, true);
-	if (blk->pointer <= (size_t)(zone->block_table + zone->table_size)
-					&& blk->pointer > (size_t)zone + zone->zone_size)
-		ft_putstr("\e[37;1m some invalid pointer allocated\e[0m\n");
+	place_bounds(zone, idx - 1);
 	insert_block(zone, idx);
-	place_bounds(zone, idx);
 	zone->bytes_malloced += blk->size;
 	if (zone->table_size_age < 8)
 		zone->table_size_age++;

@@ -76,10 +76,5 @@ void __attribute__((visibility("default")))					free(void *ptr)
 {
 	if (!ptr)
 		return ;
-	if (!free_ptr(ptr))
-	{
-		ft_putstr(" - error from free: ");
-		print_hex_nbr((uint64_t)ptr);
-		ft_putchar('\n');
-	}
+	free_ptr(ptr);
 }

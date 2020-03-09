@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 13:34:11 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:20:33 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 16:49:39 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,8 @@
 #  define ABS(x) ((x) < 0 ? -(x) : (x))
 # endif
 
-# define ALIGN_TO_ARCH(x) (align_to((x), sizeof(size_t)))
-
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX ((1 << 14) - 1)
-# define BLK_LARGE_MAX (128 * 1024 * 1024)
+# define BLK_SMALL_MAX ((1 << 13))
 
 # define BLK_MIN_SIZE 32
 

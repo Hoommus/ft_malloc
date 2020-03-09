@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 17:34:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:14:16 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 15:31:54 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@ void				*alloc_largie(size_t size)
 	size_t				aligned;
 	struct s_region		*region;
 
-	aligned = align_to(align_to(sizeof(struct s_region), ALIGNMENT) + size, g_storage->pagesize);
-	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	aligned = align_to(align_to(sizeof(struct s_region), ALIGNMENT) + size,
+		g_storage->pagesize);
+	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE,
+								MAP_ANON | MAP_PRIVATE, -1, 0);
 	ft_bzero(region, sizeof(*region));
 	region->start = region;
 	region->bytes_mapped = aligned;
@@ -37,7 +39,6 @@ static void 		*mmap_more_and_alloc(size_t size, enum e_size_type type)
 	struct s_region	*new_region;
 	size_t 			region_size;
 
-	ft_putstr("allocationg more\n");
 	region_size = align_to(sizeof(struct s_region) + (type == BLK_TINY
 													  ? REGION_TINIES_SIZE : REGION_SMALLIES_SIZE), g_storage->pagesize);
 	new_region = g_storage->regions + g_storage->regions_quantity;
@@ -47,7 +48,6 @@ static void 		*mmap_more_and_alloc(size_t size, enum e_size_type type)
 	region_create(new_region, new_region->start, region_size);
 	region_create_zone(new_region, type, region_size);
 	g_storage->regions_quantity++;
-	ft_putstr("allocationg more2\n");
 	return (alloc(size, type));
 }
 
@@ -72,10 +72,6 @@ void				*alloc(size_t size, enum e_size_type type)
 		zone = region[i++].zones;
 		while (zone && zone->type == type)
 		{
-			ft_putstr("zone chosen, looking for block\nzone: ");
-			print_hex_nbr((uint64_t)zone);
-			ft_putendl("");
-			assert(zone->zone_magic == ZONE_MAGIC);
 			if (zone->bytes_free && (blk = get_block_reverse(zone, aligned)))
 				break ;
 			zone = zone->next;
@@ -83,9 +79,6 @@ void				*alloc(size_t size, enum e_size_type type)
 	}
 	if (!blk)
 		blk = mmap_more_and_alloc(size, type);
-	ft_putstr("allocating ");
-	print_hex_nbr((uint64_t)blk);
-	ft_putendl("");
 	pthread_mutex_unlock(&g_mutex);
 	return (blk);
 }

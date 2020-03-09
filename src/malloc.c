@@ -26,7 +26,6 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 	if (!g_storage)
 		return ;
 	i = 0;
-	ft_putstr("destroyin\n");
 	pthread_mutex_lock(&g_mutex);
 	array = g_storage->regions;
 	while (i < g_storage->regions_quantity)
@@ -45,16 +44,12 @@ __attribute__((destructor,used)) static void	malloc_destroy(void)
 	g_storage = NULL;
 	pthread_mutex_unlock(&g_mutex);
 	pthread_mutex_destroy(&g_mutex);
-	ft_putstr("destroyed\n");
 }
 
 void __attribute__((visibility("default")))		*malloc(size_t size)
 {
 	if (!g_storage)
 		malloc_init();
-	ft_putstr("\ninside our malloc\n Requesting: ");
-	ft_putnbr(size);
-	ft_putendl("");
 	if (size == 0)
 		return (NULL);
 	if (size > BLK_SMALL_MAX)
