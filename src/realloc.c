@@ -70,11 +70,6 @@ void __attribute__((visibility("default")))
 	size_t			idx;
 	struct s_zone	*zone;
 
-	ft_putstr("\e[36;1m ***** realloc of ");
-	print_hex_nbr((uint64_t)ptr);
-	ft_putstr(" with new size ");
-	ft_putnbr(new_size);
-	ft_putendl("\e[0m");
 	if (!is_ptr_valid(ptr))
 		return (NULL);
 	else if (!ptr)
@@ -88,7 +83,8 @@ void __attribute__((visibility("default")))
 	{
 		if (((struct s_region *)zone)->bytes_mapped >= new_size)
 			return (ptr);
-		p = ft_memcpy(alloc_largie(new_size), ptr, ((struct s_region *)zone)->bytes_mapped);
+		p = ft_memcpy(alloc_largie(new_size), ptr,
+			((struct s_region *)zone)->bytes_mapped);
 		free(ptr);
 		return (p);
 	}

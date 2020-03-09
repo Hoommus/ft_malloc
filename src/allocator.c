@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 17:34:02 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/08 20:11:49 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:14:16 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,12 @@ void				*alloc_largie(size_t size)
 	size_t				aligned;
 	struct s_region		*region;
 
-	aligned = align_to(ALIGN_TO_ARCH(sizeof(struct s_region)) + size, g_storage->pagesize);
+	aligned = align_to(align_to(sizeof(struct s_region), ALIGNMENT) + size, g_storage->pagesize);
 	region = mmap(NULL, aligned, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
 	ft_bzero(region, sizeof(*region));
 	region->start = region;
 	region->bytes_mapped = aligned;
-	region->large = (struct s_zone *)region + ALIGN_TO_ARCH(sizeof(struct s_region));
+	region->large = (void *)((size_t)region + align_to(sizeof(struct s_region), 16));
 	pthread_mutex_lock(&g_mutex);
 	g_storage->regions_quantity++;
 	g_storage->regions[g_storage->regions_quantity - 1] = *region;
@@ -87,6 +87,5 @@ void				*alloc(size_t size, enum e_size_type type)
 	print_hex_nbr((uint64_t)blk);
 	ft_putendl("");
 	pthread_mutex_unlock(&g_mutex);
-	//assert((size_t)blk % 8 == 0);
 	return (blk);
 }

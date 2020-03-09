@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2019/12/25 16:20:23 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/08 20:17:42 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,22 @@ static inline bool		free_large_region(struct s_region *region)
 static inline bool		free_block(struct s_zone *zone, size_t idx)
 {
 	struct s_block	*blk;
+	struct s_block	*next;
 
 	zone->table_size_age++;
 	blk = zone->block_table + idx;
-	zone->bytes_malloced -= blk->size;
+	next = zone->block_table + idx + 1;
 	blk->pointer = 0;
-	blk->size = 0;
+	if (idx >= zone->table_bound)
+		blk->size = 0;
+	else if (next->pointer == 0 && !next->size)
+	{
+		blk->size += next->size;
+		next->size = 0;
+		ft_memmove(next, next + 1,
+			sizeof(struct s_block) * (zone->table_bound - 1));
+	}
+	zone->bytes_malloced -= blk->size;
 	return (true);
 }
 
