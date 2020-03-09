@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/12/07 16:11:30 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/07 20:04:02 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:29:32 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	print_hex_nbr(uint64_t n)
 	ft_putstr(line);
 }
 
-void		print_hex_dump(void *ptr, size_t len, bool print_address)
+void	print_hex_dump(void *ptr, size_t len, bool print_address)
 {
 	static const char	alphabet[17] = "0123456789abcdef";
 	char				linebuf[64 + 32 + 1];

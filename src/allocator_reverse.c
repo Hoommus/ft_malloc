@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/25 16:54:58 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 18:28:31 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:29:32 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,10 @@ static void				fix_table_size(struct s_zone *zone)
 	if (zone->table_size_age < 8)
 		return ;
 	free_space = zone->bytes_free;
-	min_table_size = free_space / (zone->type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX);
-	new_table_size = free_space / (zone->type == BLK_TINY ? BLK_MIN_SIZE : BLK_TINY_MAX);
+	min_table_size = free_space /
+		(zone->type == BLK_TINY ? BLK_TINY_MAX : BLK_SMALL_MAX);
+	new_table_size = free_space /
+		(zone->type == BLK_TINY ? BLK_MIN_SIZE : BLK_TINY_MAX);
 	if (new_table_size < min_table_size)
 		return ;
 	if (new_table_size > zone->table_bound)
@@ -53,7 +55,7 @@ static void				fix_table_size(struct s_zone *zone)
 	zone->table_size_age = 0;
 }
 
-void				place_bounds(struct s_zone *zone, size_t pivot)
+void					place_bounds(struct s_zone *zone, size_t pivot)
 {
 	const struct s_block	*table = zone->block_table;
 	const size_t			size = zone->table_size;

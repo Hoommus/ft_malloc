@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 16:37:44 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/09 18:38:56 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 static inline bool		free_large_region(struct s_region *region)
 {
 	int		ret;
-	
+
 	assert(!region->zones);
 	assert(region->large);
 	ret = munmap(region->start, region->bytes_mapped);
@@ -47,7 +47,7 @@ static inline bool		free_block(struct s_zone *zone, size_t idx)
 	return (true);
 }
 
-bool 					free_ptr(void *ptr)
+bool					free_ptr(void *ptr)
 {
 	struct s_zone	*zone;
 	size_t			i;
