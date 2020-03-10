@@ -6,7 +6,7 @@
 /*   By: vtarasiu <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 14:59:18 by vtarasiu          #+#    #+#             */
-/*   Updated: 2020/03/09 18:38:56 by vtarasiu         ###   ########.fr       */
+/*   Updated: 2020/03/10 20:55:50 by vtarasiu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,26 @@ static inline bool		free_large_region(struct s_region *region)
 	return (!ret);
 }
 
-static inline bool		free_block(struct s_zone *zone, size_t idx)
+static void				unmap_region(struct s_region *region)
+{
+	struct s_zone	*zone;
+
+	if (g_storage->regions == region ||
+		g_storage->regions + 1 == region)
+		return ;
+	zone = region->zones;
+	if (zone->first_free_block_index == 1 &&
+		zone->table_bound == 1)
+	{
+		munmap(region->start, region->bytes_mapped);
+		ft_bzero(region, sizeof(struct s_region));
+		ft_memmove(region, region + 1,
+				sizeof(*region) * (--g_storage->regions_quantity));
+		ft_putstr("region unmapped\n");
+	}
+}
+
+static inline bool		free_block(struct s_region *region, struct s_zone *zone, size_t idx)
 {
 	struct s_block	*blk;
 	struct s_block	*next;
@@ -44,15 +63,20 @@ static inline bool		free_block(struct s_zone *zone, size_t idx)
 			sizeof(struct s_block) * (zone->table_bound - 1));
 	}
 	zone->bytes_malloced -= blk->size;
+	zone_table_bounds(zone, idx);
+	if (zone->table_size_age % 4 == 0)
+		unmap_region(region);
 	return (true);
 }
 
 bool					free_ptr(void *ptr)
 {
+	struct s_region	*region;
 	struct s_zone	*zone;
 	size_t			i;
 
 	zone = NULL;
+	region = NULL;
 	i = -1;
 	while (++i < g_storage->regions_quantity)
 		if (in_region_bounds(g_storage->regions + i, ptr))
@@ -60,6 +84,7 @@ bool					free_ptr(void *ptr)
 			if (!g_storage->regions[i].large)
 			{
 				zone = g_storage->regions[i].zones;
+				region = g_storage->regions + i;
 				break ;
 			}
 			else
@@ -68,7 +93,7 @@ bool					free_ptr(void *ptr)
 	i = 0;
 	while (zone && ++i < zone->table_size)
 		if ((void *)zone->block_table[i].pointer == ptr)
-			return (free_block(zone, i));
+			return (free_block(region, zone, i));
 	return (false);
 }
 

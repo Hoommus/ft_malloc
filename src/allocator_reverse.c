@@ -55,7 +55,7 @@ static void				fix_table_size(struct s_zone *zone)
 	zone->table_size_age = 0;
 }
 
-void					place_bounds(struct s_zone *zone, size_t pivot)
+void					zone_table_bounds(struct s_zone *zone, size_t pivot)
 {
 	const struct s_block	*table = zone->block_table;
 	const size_t			size = zone->table_size;
@@ -86,7 +86,7 @@ static void				*block_allocate(struct s_zone *zone, size_t idx,
 	blk->pointer = ptr ? ptr : prev->pointer - size;
 	blk->size = size;
 	insert_block(zone, idx);
-	place_bounds(zone, idx);
+	zone_table_bounds(zone, idx);
 	zone->bytes_malloced += blk->size;
 	if (zone->table_size_age < 8)
 		zone->table_size_age++;

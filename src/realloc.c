@@ -44,7 +44,7 @@ void					*resize_ptr(struct s_zone *zone, size_t block_idx,
 {
 	const struct s_block		*block = zone->block_table + block_idx;
 	const struct s_block		*next = zone->block_table + block_idx + 1;
-	void 						*p;
+	void						*p;
 
 	if (block->size >= new_size)
 		return (ptr);
@@ -74,7 +74,7 @@ void __attribute__((visibility("default")))
 	else if (!ptr)
 		return (malloc(new_size));
 	else if (new_size == 0)
-		return (malloc(align_to(BLK_MIN_SIZE, 32)));
+		return (malloc(align_to(BLK_MIN_SIZE, 16)));
 	pthread_mutex_lock(&g_mutex);
 	zone = (struct s_zone *)get_block(ptr, &idx);
 	pthread_mutex_unlock(&g_mutex);

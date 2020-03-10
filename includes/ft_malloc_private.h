@@ -34,7 +34,7 @@
 # endif
 
 # define BLK_TINY_MAX 128
-# define BLK_SMALL_MAX ((1 << 13))
+# define BLK_SMALL_MAX ((1 << 12))
 
 # define BLK_MIN_SIZE 16
 
@@ -61,7 +61,6 @@ struct								s_block
 	size_t				pointer:48;
 } __attribute__((packed));
 
-// Zones contain blocks that will be returned via a malloc() call
 struct								s_zone
 {
 	uint64_t			zone_magic;
@@ -78,7 +77,6 @@ struct								s_zone
 	struct s_block		block_table[];
 } __attribute__((aligned(8)));
 
-// Regions contain continuous memory that was acquired from every mmap() call
 struct								s_region
 {
 	uint64_t		magic;
@@ -94,11 +92,6 @@ struct								s_stats
 	struct rlimit	limits;
 	size_t			total_allocated;
 	size_t			total_mapped;
-};
-
-enum								e_flags
-{
-	FLAG_REVERSE_ALLOCATOR = 1U,
 };
 
 struct								s_storage
@@ -127,6 +120,8 @@ struct s_zone						*region_create_zone(struct s_region *region,
 bool								in_region_bounds(struct s_region *region, void *ptr);
 void								*get_block_straight(struct s_zone *zone, size_t size);
 void								*get_block_reverse(struct s_zone *zone, size_t size);
+
+void								zone_table_bounds(struct s_zone *zone, size_t pivot);
 
 size_t								align_to(size_t size, size_t to_what);
 void								print_hex_dump(void *ptr, size_t len, bool print_address);
